@@ -1,0 +1,49 @@
+<app-kinetic-backdrop [intensity]="progress()" />
+
+<main class="shell">
+  @if (ready()) {
+    @if (arrived()) {
+      <app-birthday-reveal animate.enter="anim-fade-in" />
+    } @else {
+      <app-countdown-hero animate.enter="anim-fade-in" />
+    }
+
+    <app-events-section animate.enter="anim-fade-in" />
+  } @else {
+    <!-- Enquanto o relógio não começa a bater no navegador (e no HTML do SSR),
+         mostramos o baralho sendo embaralhado. -->
+    <div class="intro" animate.leave="anim-fade-out">
+      <div class="intro__deck" aria-hidden="true">
+        <app-playing-card faceDown [charge]="0.2" />
+        <app-playing-card faceDown [charge]="0.35" />
+        <app-playing-card faceDown [charge]="0.5" />
+      </div>
+      <p class="eyebrow">Embaralhando as cartas</p>
+      <h1 class="intro__title kinetic-text">{{ config.honorific }}</h1>
+      <p class="cajun">« {{ config.tagline }} »</p>
+    </div>
+  }
+
+  <footer class="foot">
+    <button
+      type="button"
+      class="foot__suit"
+      (click)="secretTap()"
+      aria-label="Emblema do baralho"
+      title="♠"
+    >
+      ♠
+    </button>
+    <p class="foot__note cajun">Feito à mão, carta por carta.</p>
+  </footer>
+</main>
+
+@defer (when panelOpen()) {
+  @if (panelOpen()) {
+    <app-admin-panel
+      (close)="panelOpen.set(false)"
+      animate.enter="anim-fade-in"
+      animate.leave="anim-fade-out"
+    />
+  }
+}

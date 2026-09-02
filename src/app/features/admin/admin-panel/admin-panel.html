@@ -1,0 +1,192 @@
+<div class="scrim" (click)="close.emit()"></div>
+
+<section class="panel" role="dialog" aria-modal="true" aria-label="Painel de eventos">
+  <header class="panel__head">
+    <div>
+      <p class="eyebrow">Bastidores</p>
+      <h2 class="panel__title">Painel do Gambit</h2>
+    </div>
+    <button type="button" class="icon-btn" (click)="close.emit()">
+      <span class="sr-only">Fechar painel</span>
+      <span aria-hidden="true">✕</span>
+    </button>
+  </header>
+
+  @if (feedback(); as message) {
+    <p class="toast" role="status" animate.enter="anim-fade-in" animate.leave="anim-fade-out">
+      {{ message }}
+    </p>
+  }
+
+  <!-- Viagem no tempo -->
+  <section class="block">
+    <h3 class="block__title">Viagem no tempo</h3>
+    <p class="block__hint">
+      Simula o relógio para conferir as aberturas. Agora:
+      <strong>{{ now() | schedule: 'long' }}</strong>
+      @if (timeTravelling()) {
+        <em class="tag">simulado</em>
+      }
+    </p>
+
+    <div class="row">
+      <label class="field grow">
+        <span>Ir para</span>
+        <input
+          type="datetime-local"
+          [ngModel]="travelTarget()"
+          (ngModelChange)="travelTarget.set($event)"
+        />
+      </label>
+      <button type="button" class="btn btn--primary" (click)="applyTravel()">Ir</button>
+    </div>
+
+    <div class="chips">
+      <button type="button" class="chip" (click)="jump(-hourMs)">-1h</button>
+      <button type="button" class="chip" (click)="jump(hourMs)">+1h</button>
+      <button type="button" class="chip" (click)="jump(dayMs)">+1 dia</button>
+      <button type="button" class="chip" (click)="jumpToBirthday()">🎂 aniversário</button>
+      <button type="button" class="chip chip--reset" (click)="resetClock()">horário real</button>
+    </div>
+  </section>
+
+  <!-- Formulário -->
+  <section class="block">
+    <h3 class="block__title">{{ editing() ? 'Editar carta' : 'Nova carta' }}</h3>
+
+    <div class="form">
+      <label class="field">
+        <span>Título</span>
+        <input
+          type="text"
+          placeholder="Jantar à luz de vela"
+          [ngModel]="draft().title"
+          (ngModelChange)="patch({ title: $event })"
+        />
+      </label>
+
+      <label class="field">
+        <span>Provocação (aparece selada)</span>
+        <input
+          type="text"
+          placeholder="Separa a noite. Só isso."
+          [ngModel]="draft().teaser"
+          (ngModelChange)="patch({ teaser: $event })"
+        />
+      </label>
+
+      <label class="field">
+        <span>Mensagem revelada</span>
+        <textarea
+          rows="5"
+          placeholder="Uma linha em branco separa os parágrafos."
+          [ngModel]="draft().message"
+          (ngModelChange)="patch({ message: $event })"
+        ></textarea>
+      </label>
+
+      <div class="row">
+        <label class="field short">
+          <span>Ícone</span>
+          <input
+            type="text"
+            maxlength="2"
+            [ngModel]="draft().icon"
+            (ngModelChange)="patch({ icon: $event })"
+          />
+        </label>
+
+        <label class="field grow">
+          <span>Abre em</span>
+          <input
+            type="datetime-local"
+            [ngModel]="draft().opensAt"
+            (ngModelChange)="patch({ opensAt: $event })"
+          />
+        </label>
+      </div>
+
+      <div class="row">
+        <label class="field grow">
+          <span>Duração (minutos)</span>
+          <input
+            type="number"
+            min="1"
+            step="30"
+            [ngModel]="draft().durationMinutes"
+            (ngModelChange)="patch({ durationMinutes: +$event })"
+          />
+        </label>
+
+        <div class="field grow">
+          <span>Cor</span>
+          <div class="accents">
+            @for (accent of accents; track accent) {
+              <button
+                type="button"
+                class="accent accent--{{ accent }}"
+                [class.is-active]="draft().accent === accent"
+                [attr.aria-pressed]="draft().accent === accent"
+                (click)="patch({ accent: accent })"
+              >
+                <span class="sr-only">{{ accent }}</span>
+              </button>
+            }
+          </div>
+        </div>
+      </div>
+
+      <div class="row row--end">
+        @if (editing()) {
+          <button type="button" class="btn btn--ghost" (click)="resetDraft()">Cancelar</button>
+        }
+        <button type="button" class="btn btn--primary" [disabled]="!canSave()" (click)="save()">
+          {{ editing() ? 'Salvar' : 'Adicionar' }}
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Lista -->
+  <section class="block">
+    <h3 class="block__title">Na mesa ({{ views().length }})</h3>
+
+    <ul class="list" role="list">
+      @for (view of views(); track view.event.id) {
+        <li class="list__item" animate.enter="anim-fade-in" animate.leave="anim-fade-out">
+          <span class="list__icon" aria-hidden="true">{{ view.event.icon }}</span>
+          <span class="list__text">
+            <strong>{{ view.event.title || 'Sem título' }}</strong>
+            <small>{{ view.opensAtMs | schedule }} · {{ view.phase }}</small>
+          </span>
+          <button type="button" class="icon-btn" (click)="edit(view)">
+            <span class="sr-only">Editar</span><span aria-hidden="true">✎</span>
+          </button>
+          <button type="button" class="icon-btn icon-btn--danger" (click)="remove(view)">
+            <span class="sr-only">Remover</span><span aria-hidden="true">🗑</span>
+          </button>
+        </li>
+      } @empty {
+        <li class="list__empty">A mesa está vazia.</li>
+      }
+    </ul>
+  </section>
+
+  <!-- Ações gerais -->
+  <section class="block">
+    <h3 class="block__title">Manutenção</h3>
+    <div class="chips">
+      <button type="button" class="chip" (click)="copyAsCode()">Copiar como código</button>
+      <button type="button" class="chip" (click)="clearOpened()">Re-selar cartas</button>
+      @if (usingCustomList()) {
+        <button type="button" class="chip chip--reset" (click)="restoreDefaults()">
+          Restaurar lista original
+        </button>
+      }
+    </div>
+    <p class="block__hint">
+      As edições ficam salvas neste navegador. Para deixá-las permanentes, use “Copiar como código”
+      e cole em <code>src/app/data/gift-events.data.ts</code>.
+    </p>
+  </section>
+</section>

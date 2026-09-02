@@ -1,0 +1,14 @@
+<div class="unit" [class.unit--pulsing]="pulsing()">
+  <div class="unit__digits">
+    @for (digit of digits(); track $index) {
+      <span class="slot">
+        @for (char of [digit]; track char) {
+          <span class="digit" animate.enter="anim-digit-in" animate.leave="anim-digit-out">{{
+            char
+          }}</span>
+        }
+      </span>
+    }
+  </div>
+  <span class="unit__label">{{ label() }}</span>
+</div>

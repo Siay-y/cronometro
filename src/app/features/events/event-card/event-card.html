@@ -1,0 +1,56 @@
+<button
+  type="button"
+  class="card"
+  [class.is-nudging]="nudging()"
+  [attr.aria-disabled]="sealed()"
+  (animationend)="nudging.set(false)"
+  (click)="select()"
+>
+  <span class="card__aura" aria-hidden="true"></span>
+
+  <span class="card__emblem">
+    @if (sealed()) {
+      <app-playing-card faceDown [charge]="0.12" />
+    } @else {
+      <app-playing-card rank="★" suit="♦" [emblem]="event().icon" [charge]="live() ? 0.95 : 0.3" />
+    }
+  </span>
+
+  <span class="card__body">
+    <span class="card__meta">
+      <span class="eyebrow">{{ view().opensAtMs | schedule }}</span>
+      @if (isNew()) {
+        <span class="badge" animate.enter="anim-fade-in">novo</span>
+      }
+    </span>
+
+    <span class="card__title">{{ sealed() ? '???' : event().title }}</span>
+    <span class="card__teaser">{{ event().teaser }}</span>
+
+    <span class="card__status">
+      @switch (view().phase) {
+        @case ('sealed') {
+          <span class="status status--sealed">
+            <i aria-hidden="true">🔒</i> abre em {{ view().msUntilOpen | duration }}
+          </span>
+        }
+        @case ('live') {
+          <span class="status status--live">
+            <i aria-hidden="true">✦</i> disponível · resta {{ view().msRemaining | duration }}
+          </span>
+        }
+        @default {
+          <span class="status status--memory">
+            <i aria-hidden="true">✉</i> lembrança guardada
+          </span>
+        }
+      }
+    </span>
+
+    @if (live()) {
+      <span class="card__timebar" aria-hidden="true">
+        <span class="card__timefill" [style.transform]="'scaleX(' + remainingRatio() + ')'"></span>
+      </span>
+    }
+  </span>
+</button>

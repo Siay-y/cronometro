@@ -1,0 +1,44 @@
+<header class="hero">
+  <app-playing-card class="hero__card" rank="Q" suit="♥" [charge]="progress()" />
+
+  <p class="eyebrow">Contagem regressiva</p>
+
+  <h1 class="hero__title">
+    <span class="kinetic-text">{{ config.honorific }}</span>
+  </h1>
+
+  <p class="hero__lead">
+    <span class="cajun hero__quote">
+      “Gambit esperaria a vida inteira por um só toque seu, chère.”
+    </span>
+    Eu só preciso esperar até o dia 15.
+  </p>
+
+  <div class="clock" role="timer" aria-live="off">
+    <app-time-unit [value]="snapshot().days" label="Dias" />
+    <span class="clock__sep" aria-hidden="true">:</span>
+    <app-time-unit [value]="snapshot().hours" label="Horas" />
+    <span class="clock__sep" aria-hidden="true">:</span>
+    <app-time-unit [value]="snapshot().minutes" label="Min" />
+    <span class="clock__sep" aria-hidden="true">:</span>
+    <app-time-unit [value]="snapshot().seconds" label="Seg" pulsing />
+  </div>
+
+  <p class="sr-only" aria-live="polite">
+    Faltam {{ snapshot().days }} dias, {{ snapshot().hours }} horas e
+    {{ snapshot().minutes }} minutos.
+  </p>
+
+  <div class="charge">
+    <div class="charge__track">
+      <div class="charge__fill" [style.transform]="'scaleX(' + progress() + ')'"></div>
+    </div>
+    <p class="charge__caption">
+      <span class="eyebrow">Energia acumulada</span>
+      <strong>{{ chargePercent() }}%</strong>
+    </p>
+  </div>
+
+  <p class="hero__date">{{ targetMs | schedule: 'long' }}</p>
+  <p class="cajun hero__tagline">« {{ config.tagline }} »</p>
+</header>

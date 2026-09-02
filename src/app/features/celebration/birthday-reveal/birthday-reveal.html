@@ -1,0 +1,27 @@
+<section class="reveal">
+  <div class="burst" aria-hidden="true">
+    @for (spark of sparks; track spark.id) {
+      <i
+        class="spark spark--{{ spark.reach }}"
+        [style.rotate.deg]="spark.angle"
+        [style.animation-delay.ms]="spark.delay"
+        >{{ spark.glyph }}</i
+      >
+    }
+    <app-playing-card class="reveal__card" rank="A" suit="♥" [charge]="1" />
+  </div>
+
+  <p class="eyebrow">Enfim</p>
+
+  <h1 class="reveal__title">
+    <span class="kinetic-text">Bon anniversaire,</span>
+    <span class="kinetic-text">{{ config.honorific }}</span>
+  </h1>
+
+  <article class="letter surface">
+    @for (line of config.birthdayLetter; track $index) {
+      <p [style.animation-delay.ms]="$index * 220">{{ line }}</p>
+    }
+    <p class="cajun letter__sign">{{ config.signature }}</p>
+  </article>
+</section>

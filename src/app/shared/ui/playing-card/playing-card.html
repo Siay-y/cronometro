@@ -1,0 +1,16 @@
+<span class="halo" [style.opacity]="glow()" [style.scale]="lift()"></span>
+
+<span class="card" [class.card--red]="red()">
+  @if (faceDown()) {
+    <span class="back">⚜</span>
+  } @else {
+    <span class="corner corner--tl"
+      >{{ rank() }}<i>{{ suit() }}</i></span
+    >
+    <span class="center">{{ emblem() ?? suit() }}</span>
+    <span class="corner corner--br"
+      >{{ rank() }}<i>{{ suit() }}</i></span
+    >
+    <span class="sheen"></span>
+  }
+</span>

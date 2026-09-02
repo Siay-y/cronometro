@@ -1,0 +1,27 @@
+<div class="veil"></div>
+
+<div class="aura aura--magenta" [style.opacity]="auraOpacity()" [style.scale]="auraScale()"></div>
+<div class="aura aura--violet" [style.opacity]="auraOpacity()" [style.scale]="auraScale()"></div>
+<div class="aura aura--ember" [style.opacity]="auraOpacity() * 0.6"></div>
+
+<div class="drift-layer">
+  @for (card of cards; track card.id) {
+    <span
+      class="drift"
+      [style.left.%]="card.left"
+      [style.top.%]="card.top"
+      [style.font-size.px]="card.size"
+      [style.opacity]="card.opacity"
+      [style.animation-name]="card.variant"
+      [style.animation-duration.s]="card.duration"
+      [style.animation-delay.s]="card.delay"
+      >{{ card.suit }}</span
+    >
+  }
+</div>
+
+<!-- Halo carregado que acompanha o cursor, somando luz ao que estiver atrás. -->
+<div class="glow"></div>
+
+<!-- Carta de energia disparada a cada clique. -->
+<div #burst class="burst"></div>

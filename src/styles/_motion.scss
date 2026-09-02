@@ -1,0 +1,178 @@
+/* =========================================================================
+   Keyframes compartilhados + as classes usadas por `animate.enter` /
+   `animate.leave` (animações nativas do Angular, sem biblioteca extra).
+   Tudo aqui anima apenas `transform`, `opacity` e `filter` para rodar na GPU.
+   ========================================================================= */
+
+@keyframes riseIn {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 18px, 0) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes digitIn {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -0.55em, 0) rotateX(65deg);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: blur(0);
+  }
+}
+
+@keyframes digitOut {
+  from {
+    opacity: 1;
+    transform: none;
+    filter: blur(0);
+  }
+  to {
+    opacity: 0;
+    transform: translate3d(0, 0.55em, 0) rotateX(-65deg);
+    filter: blur(4px);
+  }
+}
+
+@keyframes dealCard {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 60px, 0) rotate(-14deg) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes kineticPulse {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.06);
+  }
+}
+
+@keyframes shimmerSweep {
+  from {
+    transform: translate3d(-120%, 0, 0) rotate(18deg);
+  }
+  to {
+    transform: translate3d(320%, 0, 0) rotate(18deg);
+  }
+}
+
+@keyframes auraBreathe {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: translate3d(0, -4%, 0) scale(1.14);
+  }
+}
+
+@keyframes modalIn {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 24px, 0) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes slidePanelIn {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 100%, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Recusa: a carta se sacode quando ela tenta abrir antes da hora. */
+@keyframes nudge {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  20% {
+    transform: translate3d(-7px, 0, 0) rotate(-1.5deg);
+  }
+  40% {
+    transform: translate3d(6px, 0, 0) rotate(1.5deg);
+  }
+  60% {
+    transform: translate3d(-4px, 0, 0) rotate(-1deg);
+  }
+  80% {
+    transform: translate3d(3px, 0, 0);
+  }
+}
+
+/* --- Classes de entrada/saída (Angular `animate.enter` / `animate.leave`) - */
+
+.anim-fade-in {
+  animation: fadeIn var(--dur-3) var(--ease-out) both;
+}
+
+.anim-fade-out {
+  animation: fadeOut var(--dur-2) var(--ease-out) both;
+}
+
+.anim-digit-in {
+  animation: digitIn var(--dur-3) var(--ease-expo) both;
+}
+
+.anim-digit-out {
+  animation: digitOut var(--dur-3) var(--ease-expo) both;
+}
+
+.anim-deal {
+  animation: dealCard var(--dur-4) var(--ease-spring) both;
+}
+
+/* --- Acessibilidade ------------------------------------------------------ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

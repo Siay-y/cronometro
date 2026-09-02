@@ -1,0 +1,196 @@
+:host {
+  /* Preenchidas a cada quadro pelo rastreio do ponteiro (ver o .ts). */
+  --pointer-x: 50vw;
+  --pointer-y: 50vh;
+  --tilt-x: 0;
+  --tilt-y: 0;
+
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background:
+    radial-gradient(120% 80% at 50% -10%, #1b0d2c 0%, transparent 60%),
+    radial-gradient(90% 60% at 100% 100%, #2a0b2e 0%, transparent 55%), var(--c-void);
+}
+
+/* Textura sutil de "papel de carta" por cima do fundo. */
+.veil {
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    115deg,
+    rgba(255, 255, 255, 0.015) 0 1px,
+    transparent 1px 6px
+  );
+  mix-blend-mode: overlay;
+}
+
+.aura {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(70px);
+  will-change: transform, opacity, translate;
+  animation: auraBreathe 12s var(--ease-in-out) infinite;
+  transition:
+    opacity var(--dur-5) var(--ease-out),
+    scale var(--dur-5) var(--ease-out);
+}
+
+/* Cada aura se desloca um tanto diferente: é o que cria a sensação de camadas. */
+.aura--magenta {
+  inset-inline-start: -18%;
+  inset-block-start: -12%;
+  inline-size: min(70vw, 620px);
+  block-size: min(70vw, 620px);
+  background: radial-gradient(circle, rgba(255, 45, 149, 0.55), transparent 68%);
+  translate: calc(var(--tilt-x) * 46px) calc(var(--tilt-y) * 38px);
+}
+
+.aura--violet {
+  inset-inline-end: -22%;
+  inset-block-start: 18%;
+  inline-size: min(78vw, 700px);
+  block-size: min(78vw, 700px);
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.5), transparent 68%);
+  animation-delay: -4s;
+  translate: calc(var(--tilt-x) * -32px) calc(var(--tilt-y) * -26px);
+}
+
+.aura--ember {
+  inset-inline-start: 25%;
+  inset-block-end: -25%;
+  inline-size: min(60vw, 520px);
+  block-size: min(60vw, 520px);
+  background: radial-gradient(circle, rgba(179, 121, 74, 0.45), transparent 70%);
+  animation-delay: -8s;
+  translate: calc(var(--tilt-x) * 18px) calc(var(--tilt-y) * 22px);
+}
+
+/* As cartas correm ao contrário das auras: o cenário ganha profundidade. */
+.drift-layer {
+  position: absolute;
+  inset: 0;
+  translate: calc(var(--tilt-x) * -20px) calc(var(--tilt-y) * -16px);
+}
+
+.drift {
+  position: absolute;
+  color: var(--c-magenta-soft);
+  font-family: var(--font-script);
+  line-height: 1;
+  text-shadow: 0 0 18px rgba(255, 45, 149, 0.5);
+  will-change: transform;
+  animation-timing-function: var(--ease-in-out);
+  animation-iteration-count: infinite;
+}
+
+/* --- Reação ao cursor ----------------------------------------------------- */
+
+.glow {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  inline-size: 520px;
+  block-size: 520px;
+  margin: -260px 0 0 -260px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(255, 45, 149, 0.32),
+    rgba(232, 121, 249, 0.16) 42%,
+    transparent 70%
+  );
+  filter: blur(28px);
+  /* Soma luz ao que já está pintado: os naipes por perto se acendem. */
+  mix-blend-mode: plus-lighter;
+  opacity: 0;
+  translate: var(--pointer-x) var(--pointer-y);
+  transition: opacity var(--dur-4) var(--ease-out);
+  will-change: translate;
+}
+
+:host(.has-pointer) .glow {
+  opacity: 1;
+}
+
+.burst {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  inline-size: 220px;
+  block-size: 220px;
+  margin: -110px 0 0 -110px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 45, 149, 0.7);
+  box-shadow: var(--glow-md);
+  opacity: 0;
+  translate: var(--burst-x, 50vw) var(--burst-y, 50vh);
+}
+
+.burst.is-firing {
+  animation: burstOut 620ms var(--ease-expo) both;
+}
+
+@keyframes burstOut {
+  from {
+    opacity: 0.9;
+    transform: scale(0.15);
+    filter: blur(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.6);
+    filter: blur(6px);
+  }
+}
+
+/* --- Deriva das cartas ---------------------------------------------------- */
+
+@keyframes driftA {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(-8deg);
+  }
+  50% {
+    transform: translate3d(18px, -38px, 0) rotate(10deg);
+  }
+}
+
+@keyframes driftB {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(12deg);
+  }
+  50% {
+    transform: translate3d(-26px, -22px, 0) rotate(-6deg);
+  }
+}
+
+@keyframes driftC {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1) rotate(0deg);
+  }
+  50% {
+    transform: translate3d(10px, 30px, 0) scale(1.18) rotate(16deg);
+  }
+}
+
+/* Em telas pequenas, menos elementos flutuando = mais bateria e menos ruído. */
+@media (max-width: 560px) {
+  .drift:nth-child(n + 12) {
+    display: none;
+  }
+
+  .aura {
+    filter: blur(50px);
+  }
+
+  .glow {
+    inline-size: 360px;
+    block-size: 360px;
+    margin: -180px 0 0 -180px;
+  }
+}

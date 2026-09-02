@@ -1,0 +1,45 @@
+<section class="events" id="eventos">
+  <div class="events__head">
+    <p class="eyebrow">Área de eventos</p>
+    <h2 class="events__title">As cartas na manga</h2>
+    <p class="events__lead">
+      Cada carta guarda um presente e tem hora certa para abrir. Nenhuma delas cede antes disso, nem
+      para você, {{ config.honorific }}.
+    </p>
+  </div>
+
+  <div class="events__strip">
+    <span class="events__score">
+      <strong>{{ openedCount() }}</strong> de {{ views().length }} abertas
+    </span>
+
+    @if (nextToOpen(); as next) {
+      <span class="events__next">
+        próxima em <strong>{{ next.msUntilOpen | duration }}</strong>
+      </span>
+    } @else {
+      <span class="events__next">todas as cartas já estão na mesa</span>
+    }
+  </div>
+
+  <ul class="events__list" role="list">
+    @for (view of views(); track view.event.id) {
+      <li animate.enter="anim-deal" [style.animation-delay.ms]="$index * 90">
+        <app-event-card [view]="view" (reveal)="reveal($event)" />
+      </li>
+    } @empty {
+      <li class="events__empty surface">
+        Nenhuma carta na mesa ainda. Abra o painel e distribua a primeira.
+      </li>
+    }
+  </ul>
+</section>
+
+@if (selected(); as view) {
+  <app-event-reveal
+    [view]="view"
+    (dismiss)="close()"
+    animate.enter="anim-fade-in"
+    animate.leave="anim-fade-out"
+  />
+}

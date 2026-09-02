@@ -1,0 +1,86 @@
+.reveal {
+  display: grid;
+  justify-items: center;
+  gap: var(--sp-5);
+  text-align: center;
+  padding-block: clamp(var(--sp-6), 9vw, var(--sp-8)) var(--sp-6);
+}
+
+.burst {
+  position: relative;
+  display: grid;
+  place-items: center;
+  inline-size: min(70vw, 260px);
+  aspect-ratio: 1;
+}
+
+.reveal__card {
+  --card-w: clamp(96px, 26vw, 140px);
+  animation: riseIn var(--dur-5) var(--ease-spring) both;
+}
+
+.spark {
+  position: absolute;
+  font-style: normal;
+  font-size: clamp(0.9rem, 3.4vw, 1.4rem);
+  color: var(--c-magenta-soft);
+  text-shadow: 0 0 12px rgba(255, 45, 149, 0.8);
+  animation: sparkFly 3.4s var(--ease-out) infinite;
+  will-change: transform, opacity;
+}
+
+.spark--near {
+  --spark-distance: 28vmin;
+}
+
+.spark--mid {
+  --spark-distance: 38vmin;
+}
+
+.spark--far {
+  --spark-distance: 48vmin;
+}
+
+@keyframes sparkFly {
+  0% {
+    opacity: 0;
+    transform: translateY(0) scale(0.3);
+  }
+  15% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(calc(var(--spark-distance, 36vmin) * -1)) scale(1.1);
+  }
+}
+
+.reveal__title {
+  display: grid;
+  gap: 0.06em;
+  font-family: var(--font-display);
+  font-size: clamp(2.1rem, 9vw, 4.2rem);
+  letter-spacing: 0.05em;
+  filter: drop-shadow(0 6px 34px rgba(255, 45, 149, 0.5));
+}
+
+.letter {
+  display: grid;
+  gap: var(--sp-4);
+  inline-size: min(100%, 620px);
+  padding: clamp(var(--sp-5), 6vw, var(--sp-7));
+  text-align: start;
+  color: var(--c-text-muted);
+  font-size: var(--fs-lead);
+  line-height: 1.75;
+}
+
+.letter p {
+  animation: riseIn var(--dur-5) var(--ease-expo) both;
+}
+
+.letter__sign {
+  justify-self: end;
+  font-size: clamp(1.2rem, 4.5vw, 1.6rem);
+  color: var(--c-trench-soft);
+}

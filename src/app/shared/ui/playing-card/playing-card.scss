@@ -1,0 +1,103 @@
+:host {
+  --card-w: 84px;
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  inline-size: var(--card-w);
+  aspect-ratio: 5 / 7;
+}
+
+.halo {
+  position: absolute;
+  inset: -22%;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(255, 45, 149, 0.65),
+    rgba(139, 92, 246, 0.25) 55%,
+    transparent 72%
+  );
+  filter: blur(16px);
+  animation: kineticPulse 2.6s var(--ease-in-out) infinite;
+  transition:
+    opacity var(--dur-5) var(--ease-out),
+    scale var(--dur-5) var(--ease-out);
+}
+
+.card {
+  position: relative;
+  display: grid;
+  place-items: center;
+  inline-size: 100%;
+  block-size: 100%;
+  padding: 8%;
+  overflow: hidden;
+  border-radius: calc(var(--card-w) * 0.11);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  background: var(--grad-parchment);
+  color: #1a1024;
+  box-shadow:
+    var(--shadow-raised),
+    0 0 0 1px rgba(255, 45, 149, 0.35);
+  font-family: var(--font-script);
+  font-weight: 600;
+}
+
+.card--red {
+  color: var(--c-ember);
+}
+
+.center {
+  font-size: calc(var(--card-w) * 0.46);
+  line-height: 1;
+  filter: drop-shadow(0 2px 6px rgba(90, 0, 45, 0.35));
+}
+
+.corner {
+  position: absolute;
+  display: grid;
+  justify-items: center;
+  font-size: calc(var(--card-w) * 0.16);
+  line-height: 1;
+}
+
+.corner i {
+  font-style: normal;
+}
+
+.corner--tl {
+  inset-block-start: 6%;
+  inset-inline-start: 8%;
+}
+
+.corner--br {
+  inset-block-end: 6%;
+  inset-inline-end: 8%;
+  rotate: 180deg;
+}
+
+/* Faixa de luz que atravessa a carta de tempos em tempos. */
+.sheen {
+  position: absolute;
+  inset-block: -40%;
+  inline-size: 40%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.75), transparent);
+  animation: shimmerSweep 5.5s var(--ease-in-out) infinite;
+  mix-blend-mode: overlay;
+}
+
+/* --- Verso ---------------------------------------------------------------- */
+
+.is-face-down .card {
+  background:
+    repeating-linear-gradient(45deg, rgba(255, 45, 149, 0.35) 0 6px, transparent 6px 12px),
+    repeating-linear-gradient(-45deg, rgba(139, 92, 246, 0.35) 0 6px, transparent 6px 12px),
+    linear-gradient(160deg, var(--c-surface-2), var(--c-night));
+  border-color: var(--c-hairline-strong);
+  color: var(--c-magenta-soft);
+}
+
+.back {
+  font-size: calc(var(--card-w) * 0.4);
+  text-shadow: 0 0 14px rgba(255, 45, 149, 0.7);
+}

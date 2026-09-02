@@ -1,0 +1,99 @@
+/* =========================================================================
+   Design tokens da paleta "Gambit"
+   Magenta cinético + violeta sobre a noite, com o marrom do sobretudo
+   e o vermelho dos olhos como acentos.
+   ========================================================================= */
+
+:root {
+  color-scheme: dark;
+
+  /* --- Superfícies ------------------------------------------------------ */
+  --c-void: #05030b;
+  --c-abyss: #0b0616;
+  --c-night: #130a20;
+  --c-surface: #1a0f2b;
+  --c-surface-2: #241537;
+  --c-hairline: rgba(255, 45, 149, 0.16);
+  --c-hairline-strong: rgba(255, 45, 149, 0.42);
+
+  /* --- Marca ------------------------------------------------------------ */
+  --c-magenta: #ff2d95;
+  --c-magenta-soft: #ff8ac7;
+  --c-magenta-deep: #a8005a;
+  --c-violet: #8b5cf6;
+  --c-violet-deep: #4c1d95;
+  --c-kinetic: #e879f9;
+  --c-trench: #b3794a;
+  --c-trench-soft: #e6c19a;
+  --c-ember: #ff3b5c;
+  --c-gold: #f6c453;
+
+  /* --- Texto ------------------------------------------------------------ */
+  --c-text: #f7ecff;
+  --c-text-muted: #c2adda;
+  --c-text-faint: #8a76a6;
+
+  /* --- Gradientes e auras ----------------------------------------------- */
+  --grad-kinetic: linear-gradient(
+    135deg,
+    var(--c-magenta) 0%,
+    var(--c-kinetic) 48%,
+    var(--c-violet) 100%
+  );
+  --grad-card: linear-gradient(
+    160deg,
+    rgba(255, 45, 149, 0.14),
+    rgba(139, 92, 246, 0.08) 55%,
+    rgba(5, 3, 11, 0.2)
+  );
+  --grad-parchment: linear-gradient(150deg, #f6e7d2 0%, #e8d3b4 100%);
+
+  --glow-sm: 0 0 10px rgba(255, 45, 149, 0.45);
+  --glow-md: 0 0 18px rgba(255, 45, 149, 0.5), 0 0 48px rgba(232, 121, 249, 0.22);
+  --glow-lg: 0 0 26px rgba(255, 45, 149, 0.6), 0 0 90px rgba(139, 92, 246, 0.35);
+
+  --shadow-raised: 0 18px 44px rgba(0, 0, 0, 0.55);
+  --shadow-float: 0 28px 70px rgba(0, 0, 0, 0.6);
+
+  /* --- Ritmo / espaçamento ---------------------------------------------- */
+  --sp-1: 0.25rem;
+  --sp-2: 0.5rem;
+  --sp-3: 0.75rem;
+  --sp-4: 1rem;
+  --sp-5: 1.5rem;
+  --sp-6: 2rem;
+  --sp-7: 3rem;
+  --sp-8: 4.5rem;
+
+  --r-sm: 8px;
+  --r-md: 14px;
+  --r-lg: 22px;
+  --r-xl: 30px;
+  --r-pill: 999px;
+
+  --shell-max: 1120px;
+
+  /* --- Movimento --------------------------------------------------------- */
+  --dur-1: 140ms;
+  --dur-2: 260ms;
+  --dur-3: 420ms;
+  --dur-4: 700ms;
+  --dur-5: 1200ms;
+
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+  /* --- Tipografia --------------------------------------------------------- */
+  --font-display: 'Bebas Neue', 'Impact', system-ui, sans-serif;
+  --font-script: 'Cormorant Garamond', 'Georgia', serif;
+  --font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  --fs-hero: clamp(2.6rem, 11vw, 5.5rem);
+  --fs-digit: clamp(2.8rem, 13vw, 6rem);
+  --fs-title: clamp(1.6rem, 5.5vw, 2.6rem);
+  --fs-lead: clamp(1rem, 3.4vw, 1.2rem);
+  --fs-body: clamp(0.95rem, 3vw, 1.02rem);
+  --fs-label: clamp(0.66rem, 2.4vw, 0.78rem);
+}

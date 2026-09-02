@@ -1,0 +1,184 @@
+:host {
+  --accent: var(--c-magenta);
+  display: block;
+}
+
+:host(.accent-violet) {
+  --accent: var(--c-violet);
+}
+
+:host(.accent-gold) {
+  --accent: var(--c-gold);
+}
+
+.card {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--sp-4);
+  align-items: center;
+  inline-size: 100%;
+  padding: var(--sp-4);
+  overflow: hidden;
+  text-align: start;
+  border-radius: var(--r-lg);
+  border: 1px solid var(--c-hairline);
+  background: linear-gradient(150deg, rgba(26, 15, 43, 0.9), rgba(11, 6, 22, 0.85));
+  box-shadow: var(--shadow-raised);
+  transition:
+    transform var(--dur-3) var(--ease-spring),
+    border-color var(--dur-3) var(--ease-out),
+    box-shadow var(--dur-3) var(--ease-out);
+}
+
+.card__aura {
+  position: absolute;
+  inset-block-start: -60%;
+  inset-inline-start: -20%;
+  inline-size: 60%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--accent) 45%, transparent),
+    transparent 70%
+  );
+  filter: blur(34px);
+  opacity: 0;
+  transition: opacity var(--dur-4) var(--ease-out);
+}
+
+.card__emblem {
+  --card-w: 62px;
+  display: grid;
+  place-items: center;
+  transition: transform var(--dur-3) var(--ease-spring);
+}
+
+.card__body {
+  display: grid;
+  gap: var(--sp-1);
+  min-inline-size: 0;
+}
+
+.card__meta {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+
+.badge {
+  padding: 2px 8px;
+  border-radius: var(--r-pill);
+  background: var(--grad-kinetic);
+  color: #fff;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  box-shadow: var(--glow-sm);
+}
+
+.card__title {
+  font-family: var(--font-display);
+  font-size: clamp(1.25rem, 5vw, 1.6rem);
+  letter-spacing: 0.04em;
+  color: var(--c-text);
+}
+
+.card__teaser {
+  color: var(--c-text-muted);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  margin-block-start: var(--sp-1);
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  color: var(--c-text-faint);
+}
+
+.status--live {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.card__timebar {
+  block-size: 3px;
+  margin-block-start: var(--sp-2);
+  border-radius: var(--r-pill);
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.card__timefill {
+  display: block;
+  block-size: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--c-kinetic));
+  transform-origin: left center;
+  transition: transform var(--dur-4) linear;
+}
+
+/* --- Estados -------------------------------------------------------------- */
+
+:host(.is-live) .card {
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  box-shadow:
+    var(--shadow-raised),
+    0 0 26px color-mix(in srgb, var(--accent) 28%, transparent);
+}
+
+:host(.is-live) .card__aura {
+  opacity: 1;
+  animation: auraBreathe 5s var(--ease-in-out) infinite;
+}
+
+:host(.is-memory) .card {
+  opacity: 0.72;
+}
+
+:host(.is-memory) .card__emblem {
+  filter: grayscale(0.35);
+}
+
+:host(.is-sealed) .card__teaser {
+  filter: blur(3.5px);
+  opacity: 0.75;
+  user-select: none;
+}
+
+.card:hover,
+.card:focus-visible {
+  transform: translateY(-3px);
+  border-color: color-mix(in srgb, var(--accent) 60%, transparent);
+}
+
+.card:hover .card__emblem {
+  transform: rotate(-6deg) scale(1.06);
+}
+
+:host(.is-sealed) .card:hover {
+  transform: none;
+}
+
+.card:active {
+  transform: scale(0.99);
+}
+
+.card.is-nudging {
+  animation: nudge var(--dur-4) var(--ease-in-out);
+}
+
+@media (min-width: 720px) {
+  .card {
+    padding: var(--sp-5);
+  }
+
+  .card__emblem {
+    --card-w: 76px;
+  }
+}

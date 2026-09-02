@@ -1,1 +1,6 @@
-/* You can add global styles to this file, and also import other style files */
+/* Folha global: apenas tokens, reset, movimento e primitivas compartilhadas.
+   Todo o resto mora no SCSS encapsulado de cada componente. */
+@use 'styles/tokens';
+@use 'styles/base';
+@use 'styles/motion';
+@use 'styles/components';

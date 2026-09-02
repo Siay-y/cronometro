@@ -1,0 +1,26 @@
+<div class="scrim" (click)="dismiss.emit()"></div>
+
+<article
+  class="panel"
+  role="dialog"
+  aria-modal="true"
+  [attr.aria-label]="'Presente: ' + event().title"
+>
+  <button #closeButton type="button" class="panel__close" (click)="dismiss.emit()">
+    <span class="sr-only">Fechar</span>
+    <span aria-hidden="true">✕</span>
+  </button>
+
+  <app-playing-card class="panel__card" rank="★" suit="♦" [emblem]="event().icon" [charge]="1" />
+
+  <p class="eyebrow">{{ view().opensAtMs | schedule: 'long' }}</p>
+  <h2 class="panel__title kinetic-text">{{ event().title }}</h2>
+
+  <div class="panel__message">
+    @for (paragraph of paragraphs(); track $index) {
+      <p [style.animation-delay.ms]="120 + $index * 140">{{ paragraph }}</p>
+    }
+  </div>
+
+  <p class="cajun panel__sign">{{ config.signature }}</p>
+</article>

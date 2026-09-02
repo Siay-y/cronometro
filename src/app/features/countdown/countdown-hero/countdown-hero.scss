@@ -1,0 +1,109 @@
+.hero {
+  display: grid;
+  justify-items: center;
+  gap: var(--sp-4);
+  text-align: center;
+  padding-block: clamp(var(--sp-6), 8vw, var(--sp-8)) var(--sp-6);
+}
+
+.hero__card {
+  --card-w: clamp(74px, 20vw, 110px);
+  rotate: -7deg;
+  animation: riseIn var(--dur-5) var(--ease-spring) both;
+  transition: rotate var(--dur-4) var(--ease-spring);
+}
+
+.hero__card:hover {
+  rotate: 4deg;
+}
+
+.hero__title {
+  font-family: var(--font-display);
+  font-size: var(--fs-hero);
+  letter-spacing: 0.06em;
+  line-height: 0.95;
+  filter: drop-shadow(0 6px 30px rgba(255, 45, 149, 0.45));
+}
+
+.hero__lead {
+  max-inline-size: 40ch;
+  color: var(--c-text-muted);
+  font-size: var(--fs-lead);
+}
+
+/* A fala dele ganha o corpo maior e o tom do sobretudo. */
+.hero__quote {
+  display: block;
+  margin-block-end: var(--sp-2);
+  font-size: clamp(1.1rem, 4.4vw, 1.45rem);
+  line-height: 1.4;
+}
+
+.clock {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: clamp(2px, 1vw, var(--sp-2));
+  margin-block-start: var(--sp-3);
+  inline-size: 100%;
+}
+
+.clock__sep {
+  font-family: var(--font-display);
+  font-size: calc(var(--fs-digit) * 0.62);
+  line-height: 1.5;
+  color: var(--c-magenta);
+  animation: kineticPulse 1s steps(2, end) infinite;
+}
+
+.charge {
+  inline-size: min(100%, 460px);
+  display: grid;
+  gap: var(--sp-2);
+  margin-block-start: var(--sp-3);
+}
+
+.charge__track {
+  block-size: 6px;
+  border-radius: var(--r-pill);
+  background: rgba(255, 255, 255, 0.07);
+  overflow: hidden;
+}
+
+.charge__fill {
+  block-size: 100%;
+  border-radius: inherit;
+  background: var(--grad-kinetic);
+  box-shadow: var(--glow-md);
+  transform-origin: left center;
+  transition: transform var(--dur-5) var(--ease-out);
+}
+
+.charge__caption {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-3);
+}
+
+.charge__caption strong {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  color: var(--c-magenta-soft);
+}
+
+.hero__date {
+  color: var(--c-text-faint);
+  font-size: 0.92rem;
+  text-transform: capitalize;
+}
+
+.hero__tagline {
+  font-size: clamp(1.05rem, 4vw, 1.35rem);
+}
+
+@media (min-width: 640px) {
+  .clock {
+    gap: var(--sp-3);
+  }
+}
