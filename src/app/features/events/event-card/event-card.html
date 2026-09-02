@@ -31,18 +31,16 @@
       @switch (view().phase) {
         @case ('sealed') {
           <span class="status status--sealed">
-            <i aria-hidden="true">🔒</i> abre em {{ view().msUntilOpen | duration }}
+            <app-icon name="lock" /> abre em {{ view().msUntilOpen | duration }}
           </span>
         }
         @case ('live') {
           <span class="status status--live">
-            <i aria-hidden="true">✦</i> disponível · resta {{ view().msRemaining | duration }}
+            <app-icon name="spark" /> disponível · resta {{ view().msRemaining | duration }}
           </span>
         }
         @default {
-          <span class="status status--memory">
-            <i aria-hidden="true">✉</i> lembrança guardada
-          </span>
+          <span class="status status--memory"> <app-icon name="letter" /> lembrança guardada </span>
         }
       }
     </span>

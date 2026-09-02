@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, input, output, signal } f
 import { GiftEventView } from '../../../core/models/gift-event.model';
 import { DurationPipe } from '../../../shared/pipes/duration.pipe';
 import { SchedulePipe } from '../../../shared/pipes/schedule.pipe';
+import { Icon } from '../../../shared/ui/icon/icon';
 import { PlayingCard } from '../../../shared/ui/playing-card/playing-card';
 
 /**
@@ -12,7 +13,7 @@ import { PlayingCard } from '../../../shared/ui/playing-card/playing-card';
  */
 @Component({
   selector: 'app-event-card',
-  imports: [PlayingCard, DurationPipe, SchedulePipe],
+  imports: [PlayingCard, Icon, DurationPipe, SchedulePipe],
   templateUrl: './event-card.html',
   styleUrl: './event-card.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
