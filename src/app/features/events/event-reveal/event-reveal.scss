@@ -46,10 +46,11 @@
 
 .panel__close {
   position: absolute;
-  inset-block-start: var(--sp-3);
-  inset-inline-end: var(--sp-3);
-  inline-size: 40px;
-  block-size: 40px;
+  inset-block-start: var(--sp-2);
+  inset-inline-end: var(--sp-2);
+  /* 44px é o alvo mínimo confortável para o dedo. */
+  inline-size: 44px;
+  block-size: 44px;
   display: grid;
   place-items: center;
   border-radius: 50%;

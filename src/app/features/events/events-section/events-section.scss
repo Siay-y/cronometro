@@ -63,6 +63,18 @@
   color: var(--c-text-faint);
 }
 
+/* Em tela estreita as duas informações não cabem lado a lado. Em vez de deixar
+   quebrar sozinho (e virar uma pílula de duas linhas), empilhamos de propósito. */
+@media (max-width: 520px) {
+  .events__strip {
+    flex-direction: column;
+    align-items: center;
+    gap: var(--sp-1);
+    border-radius: var(--r-lg);
+    text-align: center;
+  }
+}
+
 @media (min-width: 860px) {
   .events__list {
     grid-template-columns: repeat(2, minmax(0, 1fr));

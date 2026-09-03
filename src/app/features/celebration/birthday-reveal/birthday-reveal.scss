@@ -41,6 +41,22 @@
   --spark-distance: 48vmin;
 }
 
+/* Em celular os estilhaços passavam da borda da tela e criavam rolagem
+   lateral: encurtamos o alcance para caberem dentro do próprio estouro. */
+@media (max-width: 560px) {
+  .spark--near {
+    --spark-distance: 20vmin;
+  }
+
+  .spark--mid {
+    --spark-distance: 27vmin;
+  }
+
+  .spark--far {
+    --spark-distance: 34vmin;
+  }
+}
+
 @keyframes sparkFly {
   0% {
     opacity: 0;

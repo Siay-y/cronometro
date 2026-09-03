@@ -91,7 +91,9 @@
   --font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
 
   --fs-hero: clamp(2.6rem, 11vw, 5.5rem);
-  --fs-digit: clamp(2.8rem, 13vw, 6rem);
+  /* O mínimo aqui é o que mandava a linha do relógio vazar da tela em celular
+     estreito: quatro casas de dois dígitos precisam caber em ~90vw. */
+  --fs-digit: clamp(2.2rem, 11.5vw, 6rem);
   --fs-title: clamp(1.6rem, 5.5vw, 2.6rem);
   --fs-lead: clamp(1rem, 3.4vw, 1.2rem);
   --fs-body: clamp(0.95rem, 3vw, 1.02rem);

@@ -43,7 +43,7 @@
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  gap: clamp(2px, 1vw, var(--sp-2));
+  gap: clamp(1px, 0.6vw, var(--sp-2));
   margin-block-start: var(--sp-3);
   inline-size: 100%;
 }

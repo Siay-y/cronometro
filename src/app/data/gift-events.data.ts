@@ -29,13 +29,13 @@ export const GIFT_EVENTS: readonly GiftEvent[] = [
   },
   {
     id: 'gift-02',
-    title: 'A trilha sonora de nós dois',
-    teaser: 'Coloca o fone. Este aqui é para ouvir.',
+    title: 'Skinzinha nova :>>',
+    teaser: 'Presentinho novo te esperando no Rivals.',
     message:
-      'Fiz uma playlist com as músicas que, de um jeito ou de outro, viraram nossas.\n\nAlgumas você vai reconhecer na primeira nota. Outras você nem sabia que eu tinha reparado que você gostava.\n\nEscuta na ordem, porque eu pensei na ordem.',
-    icon: '🎧',
+      'Vamos jogar com as skins novas mon amour. \n\nCom certeza que você vai querer a do Gambit também, mas por enquanto é só o da Rogue. Espero muito que gosto do seu presentinho.',
+    icon: '🎮',
     accent: 'violet',
-    opensAt: '2026-09-04T19:00',
+    opensAt: '2026-09-03T21:00',
     durationMinutes: 2880,
   },
   {
@@ -87,7 +87,7 @@ export const GIFT_EVENTS: readonly GiftEvent[] = [
     title: 'A última carta antes da meia-noite',
     teaser: 'Uma hora. Depois disso, o ano vira.',
     message:
-      'Falta uma hora.\n\nAntes de o relógio virar, eu queria te dizer uma coisa: obrigado por cada dia deste ano que passou. Os fáceis e principalmente os outros.\n\nFica de olho no contador. Quando ele zerar, tem mais uma coisa te esperando aqui.',
+      'Falta uma hora.\n\nAntes de o relógio virar, eu queria te dizer uma coisa: obrigado por cada dia deste ano que passou foi tudo perfeito e maravilho, cada segundo ao seu ladinho. Os fáceis e principalmente os outros.\n\nFica de olho no contador. Quando ele zerar, tem mais uma coisa te esperando aqui :>>',
     icon: '♠',
     accent: 'magenta',
     opensAt: '2026-09-14T23:00',
@@ -98,7 +98,7 @@ export const GIFT_EVENTS: readonly GiftEvent[] = [
     title: 'O presente principal',
     teaser: 'Aquele que eu venho segurando desde o começo.',
     message:
-      'Feliz aniversário, Mon Cher.\n\nEste é o presente que eu venho guardando desde o primeiro card deste site, e que eu prefiro te entregar pessoalmente, olhando na sua cara.\n\nVem cá.',
+      'Feliz aniversário, Mon Cher.\n\nEste é o presente que eu venho guardando desde o primeiro card deste site, e que eu prefiro te entregar pessoalmente, olhando no seu rostinho, eu te amo muito.\n\nVem cá.',
     icon: '🎁',
     accent: 'gold',
     opensAt: '2026-09-15T00:05',
