@@ -40,13 +40,13 @@ export const GIFT_EVENTS: readonly GiftEvent[] = [
   },
   {
     id: 'gift-03',
-    title: 'Café da manhã fora de hora',
-    teaser: 'Um vale-alguma-coisa, resgatável a qualquer momento.',
+    title: 'Tem algo te esperando na Steam',
+    teaser: 'Abre a sua Steam, mon amour.',
     message:
-      'Este presente é um vale.\n\nQualquer dia, em qualquer horário, inclusive às três da tarde, você me chama e eu preparo o café da manhã inteiro do jeito que você gosta.\n\nSem prazo de validade. Só precisa dizer a palavra.',
-    icon: '☕',
-    accent: 'gold',
-    opensAt: '2026-09-06T10:00',
+      'Abre a Steam. Tem um presente lá, esperando você aceitar.\n\nNotei que esse joguinho estava na sua lista de desejos, e tenho certeza que ele vai representar uma fração do nosso amor :>\n\nAceita, instala e joga hoje. Eu quero ficar do seu lado te assistindo jogar, que é uma coisa que eu gosto de fazer mais do que você imagina.\n\nGambit ainda tem várias cartinhas para ti mon Cher. Ainda tem muitas cartas na manga.',
+    icon: '🕹️',
+    accent: 'magenta',
+    opensAt: '2026-09-06T10:30',
     durationMinutes: 2880,
   },
   {

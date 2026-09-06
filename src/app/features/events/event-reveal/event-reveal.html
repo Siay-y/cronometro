@@ -22,5 +22,24 @@
     }
   </div>
 
-  <p class="cajun panel__sign">{{ config.signature }}</p>
+  <footer class="panel__foot">
+    <button type="button" class="thanks" (click)="cheer($event)">Merci :&gt;</button>
+    <p class="cajun panel__sign">{{ config.signature }}</p>
+  </footer>
 </article>
+
+<!-- Fora do .panel de propósito: ele rola, e cortaria os corações no caminho. -->
+<div class="hearts" aria-hidden="true">
+  @for (heart of hearts(); track heart.id) {
+    <span
+      class="heart heart--{{ heart.variant }}"
+      [style.left.px]="heart.x"
+      [style.top.px]="heart.y"
+      [style.font-size.px]="heart.size"
+      [style.animation-delay.ms]="heart.delay"
+      [style.animation-duration.ms]="heart.duration"
+      (animationend)="retireHeart(heart.id)"
+      >♥</span
+    >
+  }
+</div>
