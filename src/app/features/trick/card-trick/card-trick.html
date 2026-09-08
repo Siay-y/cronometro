@@ -1,0 +1,60 @@
+<section class="trick" id="truque">
+  <div class="trick__head">
+    <p class="eyebrow">Um truque de mão</p>
+    <h2 class="trick__title">O golpe do Gambit</h2>
+    <p class="trick__lead">
+      Escolha uma destas cinco com os olhos, {{ config.honorific }}, e guarde ela só para você. Não
+      aponte, não me diga qual. Depois segure o baralho até a energia subir.
+    </p>
+  </div>
+
+  <button
+    type="button"
+    class="fan"
+    aria-label="Segure para o Gambit embaralhar as cartas"
+    [attr.aria-disabled]="revealed()"
+    (click)="select()"
+    (pointerdown)="pressStart()"
+    (pointerup)="pressEnd()"
+    (pointerleave)="pressEnd()"
+    (pointercancel)="pressEnd()"
+  >
+    <span class="fan__burst" aria-hidden="true"></span>
+
+    <!-- `track $index` de propósito: o mesmo elemento serve à carta que sai e à
+         que entra, então o giro atravessa a troca da mão sem cortar. -->
+    @for (slot of slots(); track $index) {
+      <span class="fan__slot" [style.rotate]="slot.rotate" [style.translate]="slot.translate">
+        <app-playing-card
+          class="fan__card"
+          [rank]="slot.card.rank"
+          [suit]="slot.card.suit"
+          [faceDown]="faceDown()"
+          [charge]="cardCharge()"
+          [style.animation-delay.ms]="slot.delay"
+        />
+      </span>
+    }
+  </button>
+
+  <span class="trick__meter" aria-hidden="true">
+    <span class="trick__fill"></span>
+  </span>
+
+  <div class="trick__foot">
+    @if (revealed()) {
+      <div class="verdict" role="status" animate.enter="anim-fade-in">
+        <p class="verdict__gone kinetic-text">A sua sumiu, non?</p>
+        <p class="verdict__text">
+          Gambit tira qualquer carta da mesa sem ninguém ver. Só que a sua ele não devolve: essa
+          fica guardada no bolso esquerdo do sobretudo, do lado do coração.
+        </p>
+        <p class="cajun">« Roubei a tua carta, chère. Faz tempo que roubei o resto também. »</p>
+
+        <button type="button" class="btn btn--ghost" (click)="again()">Embaralhar de novo</button>
+      </div>
+    } @else {
+      <p class="trick__hint"><app-icon name="spark" /> segure o baralho para embaralhar</p>
+    }
+  </div>
+</section>

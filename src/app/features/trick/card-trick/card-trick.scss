@@ -1,0 +1,250 @@
+:host {
+  display: block;
+}
+
+.trick {
+  display: grid;
+  justify-items: center;
+  gap: var(--sp-4);
+  padding-block: var(--sp-7) var(--sp-6);
+  text-align: center;
+}
+
+.trick__head {
+  display: grid;
+  gap: var(--sp-2);
+  max-inline-size: 46ch;
+}
+
+.trick__title {
+  font-family: var(--font-display);
+  font-size: var(--fs-title);
+  letter-spacing: 0.05em;
+  color: var(--c-text);
+}
+
+.trick__lead {
+  color: var(--c-text-muted);
+  font-size: var(--fs-body);
+  line-height: 1.6;
+}
+
+/* --- O leque --------------------------------------------------------------
+   O `rotate`/`translate` de cada carta vem do componente e mora no invólucro;
+   as animações mexem só no `transform` da carta. Como as três são propriedades
+   independentes, elas se somam em vez de se atropelar.
+   -------------------------------------------------------------------------- */
+
+.fan {
+  --fan-card: clamp(52px, 15vw, 82px);
+
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-block: var(--sp-6) var(--sp-5);
+  padding-inline: var(--sp-4);
+  /* Segurar o dedo no baralho não pode selecionar nada nem abrir menu. */
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* Depois da revelação o baralho não responde mais: quem quiser outra rodada
+   usa o botão embaixo, então o dedo não pode prometer o que não acontece. */
+:host(.is-revealed) .fan {
+  cursor: default;
+}
+
+.fan__slot {
+  display: block;
+  /* Dá profundidade à virada das cartas na revelação. */
+  perspective: 900px;
+  /* Quando as cinco viram quatro, o leque se reabre em vez de saltar. */
+  transition:
+    rotate var(--dur-4) var(--ease-spring),
+    translate var(--dur-4) var(--ease-spring);
+}
+
+.fan__slot + .fan__slot {
+  margin-inline-start: calc(var(--fan-card) * -0.34);
+}
+
+.fan__card {
+  --card-w: var(--fan-card);
+  /* Volta rápida ao repouso quando ela solta antes da hora. */
+  transition:
+    transform 380ms var(--ease-out),
+    filter 380ms var(--ease-out);
+}
+
+.fan:focus-visible {
+  outline: 2px solid var(--c-magenta);
+  outline-offset: 6px;
+  border-radius: var(--r-lg);
+}
+
+/* --- Carga ---------------------------------------------------------------- */
+
+/* A energia sobe pelas cartas enquanto o dedo fica na tela. Puro CSS: nenhum
+   laço de quadro a quadro roda durante a carga. A duração bate com CHARGE_MS. */
+:host(.is-charging) .fan__card {
+  transform: translateY(-10px) scale(1.03);
+  filter: brightness(1.35) saturate(1.2);
+  transition-duration: 1200ms;
+  transition-timing-function: linear;
+}
+
+.trick__meter {
+  inline-size: min(240px, 62%);
+  block-size: 3px;
+  border-radius: var(--r-pill);
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity var(--dur-2) var(--ease-out);
+}
+
+:host(.is-charging) .trick__meter {
+  opacity: 1;
+}
+
+.trick__fill {
+  display: block;
+  block-size: 100%;
+  background: var(--grad-kinetic);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 380ms var(--ease-out);
+}
+
+:host(.is-charging) .trick__fill {
+  transform: scaleX(1);
+  transition-duration: 1200ms;
+  transition-timing-function: linear;
+}
+
+/* --- Embaralho ------------------------------------------------------------ */
+
+.fan__burst {
+  position: absolute;
+  inset: -15% -8%;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    #fff 0%,
+    rgba(255, 45, 149, 0.6) 32%,
+    rgba(139, 92, 246, 0.25) 52%,
+    transparent 70%
+  );
+  opacity: 0;
+  pointer-events: none;
+}
+
+:host(.is-shuffling) .fan__burst {
+  animation: trickBurst 620ms var(--ease-expo) both;
+}
+
+:host(.is-shuffling) .fan__card {
+  animation: trickToss 820ms var(--ease-in-out) both;
+}
+
+/* Cada carta sobe, dá duas voltas e volta ao lugar. O atraso por carta (vem do
+   componente) transforma o giro numa onda que atravessa o leque. */
+@keyframes trickToss {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+  }
+  28% {
+    transform: translate3d(0, -58px, 0) rotate(170deg) scale(0.92);
+  }
+  60% {
+    transform: translate3d(0, -18px, 0) rotate(430deg) scale(0.84);
+  }
+  100% {
+    transform: translate3d(0, 0, 0) rotate(720deg) scale(1);
+  }
+}
+
+@keyframes trickBurst {
+  0% {
+    opacity: 0.85;
+    transform: scale(0.3);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.9);
+  }
+}
+
+/* --- Revelação ------------------------------------------------------------ */
+
+/* As quatro que voltaram se viram para ela, uma depois da outra. */
+:host(.is-revealed) .fan__card {
+  animation: trickFlip var(--dur-4) var(--ease-out) both;
+}
+
+@keyframes trickFlip {
+  from {
+    transform: rotateY(92deg) scale(0.94);
+  }
+  to {
+    transform: none;
+  }
+}
+
+.trick__foot {
+  display: grid;
+  justify-items: center;
+  gap: var(--sp-3);
+  /* Reserva a altura do texto da revelação: sem isso a página inteira daria um
+     pulo no momento em que a mensagem entra. */
+  min-block-size: 168px;
+  align-content: start;
+}
+
+.trick__hint {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+  color: var(--c-magenta);
+  font-weight: 600;
+}
+
+.verdict {
+  display: grid;
+  justify-items: center;
+  gap: var(--sp-3);
+  max-inline-size: 44ch;
+}
+
+.verdict__gone {
+  font-family: var(--font-display);
+  font-size: var(--fs-title);
+  letter-spacing: 0.04em;
+}
+
+.verdict__text {
+  color: var(--c-text-muted);
+  font-size: var(--fs-body);
+  line-height: 1.65;
+}
+
+.verdict .cajun {
+  font-size: 1.05rem;
+}
+
+@media (min-width: 720px) {
+  .trick {
+    padding-block: var(--sp-8) var(--sp-7);
+  }
+
+  .fan__slot + .fan__slot {
+    margin-inline-start: calc(var(--fan-card) * -0.26);
+  }
+
+  .trick__foot {
+    min-block-size: 150px;
+  }
+}

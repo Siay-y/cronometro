@@ -13,6 +13,8 @@
     <app-floating-header [sentinel]="heroEnd" [origin]="heroCard()" [charge]="progress()" />
 
     <app-events-section animate.enter="anim-fade-in" />
+
+    <app-card-trick [charge]="progress()" animate.enter="anim-fade-in" />
   } @else {
     <!-- Enquanto o relógio não começa a bater no navegador (e no HTML do SSR),
          mostramos o baralho sendo embaralhado. -->

@@ -16,6 +16,7 @@ import { BirthdayReveal } from '../celebration/birthday-reveal/birthday-reveal';
 import { CountdownHero } from '../countdown/countdown-hero/countdown-hero';
 import { FloatingHeader } from './floating-header/floating-header';
 import { EventsSection } from '../events/events-section/events-section';
+import { CardTrick } from '../trick/card-trick/card-trick';
 
 /** Toques necessários no naipe do rodapé para revelar o painel. */
 const SECRET_TAPS = 5;
@@ -33,6 +34,7 @@ const SECRET_WINDOW_MS = 2500;
     CountdownHero,
     BirthdayReveal,
     EventsSection,
+    CardTrick,
     FloatingHeader,
     AdminPanel,
   ],
