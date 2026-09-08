@@ -51,11 +51,11 @@ export const GIFT_EVENTS: readonly GiftEvent[] = [
   },
   {
     id: 'gift-04',
-    title: 'Sessão da noite',
-    teaser: 'Luz apagada, cobertor, e você escolhe o filme.',
+    title: 'Comprinhas onde você quiser',
+    teaser: 'Você escolhe o lugar. Eu vou junto.',
     message:
-      'Hoje a tela é sua.\n\nVocê escolhe o filme, eu faço a pipoca e não reclamo nem uma vez se for o mesmo que a gente já viu três vezes.\n\nE sim: pode ser algum dos X-Men. Eu sei exatamente de quem você vai ficar olhando a tela inteira.',
-    icon: '🎬',
+      'Essa carta não tem lugar marcado. Quem escolhe é você ma Cher.\n\nVocê comentou daqueles produtinhos de cuidado pessoal que estava querendo, e eu guardei comigo desde então. Então é simples: a gente vai onde você quiser, e você leva o que você quiser.\n\nSem eu ficar perguntando se precisa mesmo. Você cuidando de você é uma das coisas que eu mais gosto de ver.\n\nVamos? Eu vou junto pra carregar as sacolas :>',
+    icon: '🛍️',
     accent: 'violet',
     opensAt: '2026-09-08T21:00',
     durationMinutes: 2880,
