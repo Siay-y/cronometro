@@ -1,4 +1,11 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  ElementRef,
+  inject,
+  viewChild,
+} from '@angular/core';
 import { CELEBRATION_CONFIG } from '../../../core/config/celebration.config';
 import { CountdownService } from '../../../core/services/countdown.service';
 import { PlayingCard } from '../../../shared/ui/playing-card/playing-card';
@@ -22,4 +29,11 @@ export class CountdownHero {
   protected readonly targetMs = this.countdown.targetMs;
 
   protected readonly chargePercent = computed(() => Math.round(this.progress() * 100));
+
+  private readonly cardRef = viewChild('card', { read: ElementRef });
+
+  /** A carta em si, para o cabeçalho saber de onde arremessá-la. */
+  readonly cardElement = computed<HTMLElement | null>(
+    () => this.cardRef()?.nativeElement ?? null,
+  );
 }

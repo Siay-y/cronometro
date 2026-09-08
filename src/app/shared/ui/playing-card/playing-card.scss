@@ -1,10 +1,21 @@
 :host {
   --card-w: 84px;
+
+  /* Preenchidas pelo rastreio do ponteiro (ver o .ts). Neutras em repouso. */
+  --tilt-x: 0deg;
+  --tilt-y: 0deg;
+  --shine-x: 50%;
+  --shine-y: 50%;
+  --foil-x: 50%;
+  --foil-y: 50%;
+
   position: relative;
   display: inline-grid;
   place-items: center;
   inline-size: var(--card-w);
   aspect-ratio: 5 / 7;
+  /* Dá profundidade à inclinação da carta. */
+  perspective: 700px;
 }
 
 .halo {
@@ -41,10 +52,70 @@
     0 0 0 1px rgba(255, 45, 149, 0.35);
   font-family: var(--font-script);
   font-weight: 600;
+  transform: rotateX(var(--tilt-x)) rotateY(var(--tilt-y));
+  /* A volta ao repouso é lenta; seguir o dedo é rápido (ver .is-tilting). */
+  transition: transform 520ms var(--ease-out);
+}
+
+:host(.is-tilting) .card {
+  transition-duration: 90ms;
+  transition-timing-function: linear;
 }
 
 .card--red {
   color: var(--c-ember);
+}
+
+/* --- Holografia ------------------------------------------------------------
+   Duas camadas por cima da carta, recortadas pelo `overflow: hidden` dela:
+   o foil (bandas de arco-íris que correm com o ângulo) e o brilho especular
+   (o ponto de luz que segue o dedo).
+   -------------------------------------------------------------------------- */
+
+.foil,
+.glare {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  transition: opacity 520ms var(--ease-out);
+}
+
+.foil {
+  background: repeating-linear-gradient(
+    112deg,
+    rgba(255, 45, 149, 0.5) 0%,
+    rgba(232, 121, 249, 0.42) 8%,
+    rgba(139, 92, 246, 0.5) 16%,
+    rgba(56, 189, 248, 0.38) 24%,
+    rgba(246, 196, 83, 0.42) 32%,
+    rgba(255, 45, 149, 0.5) 40%
+  );
+  background-size: 260% 260%;
+  background-position: var(--foil-x) var(--foil-y);
+  mix-blend-mode: overlay;
+  /* Em repouso fica só um sopro de cor: a carta não vira arco-íris parada. */
+  opacity: 0.14;
+}
+
+.glare {
+  background: radial-gradient(
+    circle at var(--shine-x) var(--shine-y),
+    rgba(255, 255, 255, 0.85),
+    rgba(255, 255, 255, 0.25) 28%,
+    transparent 55%
+  );
+  mix-blend-mode: soft-light;
+  opacity: 0;
+}
+
+:host(.is-tilting) .foil {
+  opacity: 0.66;
+  transition-duration: 90ms;
+}
+
+:host(.is-tilting) .glare {
+  opacity: 0.9;
+  transition-duration: 90ms;
 }
 
 .center {

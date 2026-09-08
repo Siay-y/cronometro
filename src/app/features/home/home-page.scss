@@ -8,6 +8,13 @@
   align-content: start;
 }
 
+/* Marca invisível de rolagem: não ocupa espaço nem aparece para leitores. */
+.hero-end {
+  display: block;
+  block-size: 1px;
+  margin-block-start: calc(var(--sp-5) * -1);
+}
+
 /* --- Intro (SSR + primeiro render) ---------------------------------------- */
 
 .intro {

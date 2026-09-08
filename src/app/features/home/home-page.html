@@ -8,6 +8,10 @@
       <app-countdown-hero animate.enter="anim-fade-in" />
     }
 
+    <!-- Marca o fim do herói: o cabeçalho aparece quando ela passa daqui. -->
+    <span #heroEnd class="hero-end" aria-hidden="true"></span>
+    <app-floating-header [sentinel]="heroEnd" [origin]="heroCard()" [charge]="progress()" />
+
     <app-events-section animate.enter="anim-fade-in" />
   } @else {
     <!-- Enquanto o relógio não começa a bater no navegador (e no HTML do SSR),
@@ -25,14 +29,7 @@
   }
 
   <footer class="foot">
-    <button
-      type="button"
-      class="foot__suit"
-      aria-label="Emblema do baralho"
-      title="♠"
-    >
-      ♠
-    </button>
+    <button type="button" class="foot__suit" aria-label="Emblema do baralho" title="♠">♠</button>
     <p class="foot__note cajun">Feito à mão, carta por carta.</p>
   </footer>
 </main>

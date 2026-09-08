@@ -57,7 +57,7 @@ export const GIFT_EVENTS: readonly GiftEvent[] = [
       'Essa carta não tem lugar marcado. Quem escolhe é você ma Cher.\n\nVocê comentou daqueles produtinhos de cuidado pessoal que estava querendo, e eu guardei comigo desde então. Então é simples: a gente vai onde você quiser, e você leva o que você quiser.\n\nSem eu ficar perguntando se precisa mesmo. Você cuidando de você é uma das coisas que eu mais gosto de ver.\n\nVamos? Eu vou junto pra carregar as sacolas :>',
     icon: '🛍️',
     accent: 'violet',
-    opensAt: '2026-09-08T21:00',
+    opensAt: '2026-09-08T19:00',
     durationMinutes: 2880,
   },
   {

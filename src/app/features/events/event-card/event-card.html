@@ -3,8 +3,12 @@
   class="card"
   [class.is-nudging]="nudging()"
   [attr.aria-disabled]="sealed()"
-  (animationend)="nudging.set(false)"
+  (animationend)="onAnimationEnd($event)"
   (click)="select()"
+  (pointerdown)="pressStart($event)"
+  (pointerup)="pressEnd()"
+  (pointerleave)="pressEnd()"
+  (pointercancel)="pressEnd()"
 >
   <span class="card__aura" aria-hidden="true"></span>
 
@@ -13,6 +17,16 @@
       <app-playing-card faceDown [charge]="0.12" />
     } @else {
       <app-playing-card rank="★" suit="♦" [emblem]="event().icon" [charge]="live() ? 0.95 : 0.3" />
+    }
+
+    @if (needsCharge()) {
+      <!-- Anel de carga: o preenchimento é uma transição de CSS, não um laço de
+           quadro a quadro. `pathLength` deixa o traço medir 100 unidades. -->
+      <svg class="ring" viewBox="0 0 50 70" aria-hidden="true">
+        <rect class="ring__track" x="2" y="2" width="46" height="66" rx="6" pathLength="100" />
+        <rect class="ring__fill" x="2" y="2" width="46" height="66" rx="6" pathLength="100" />
+      </svg>
+      <span class="flash" aria-hidden="true"></span>
     }
   </span>
 
@@ -35,9 +49,15 @@
           </span>
         }
         @case ('live') {
-          <span class="status status--live">
-            <app-icon name="spark" /> disponível · resta {{ view().msRemaining | duration }}
-          </span>
+          @if (needsCharge()) {
+            <span class="status status--live status--charge">
+              <app-icon name="spark" /> segure para carregar
+            </span>
+          } @else {
+            <span class="status status--live">
+              <app-icon name="spark" /> disponível · resta {{ view().msRemaining | duration }}
+            </span>
+          }
         }
         @default {
           <span class="status status--memory"> <app-icon name="letter" /> lembrança guardada </span>

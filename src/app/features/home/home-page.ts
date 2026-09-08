@@ -1,4 +1,11 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { CELEBRATION_CONFIG } from '../../core/config/celebration.config';
 import { CountdownService } from '../../core/services/countdown.service';
@@ -7,6 +14,7 @@ import { PlayingCard } from '../../shared/ui/playing-card/playing-card';
 import { AdminPanel } from '../admin/admin-panel/admin-panel';
 import { BirthdayReveal } from '../celebration/birthday-reveal/birthday-reveal';
 import { CountdownHero } from '../countdown/countdown-hero/countdown-hero';
+import { FloatingHeader } from './floating-header/floating-header';
 import { EventsSection } from '../events/events-section/events-section';
 
 /** Toques necessários no naipe do rodapé para revelar o painel. */
@@ -19,7 +27,15 @@ const SECRET_WINDOW_MS = 2500;
  */
 @Component({
   selector: 'app-home',
-  imports: [KineticBackdrop, PlayingCard, CountdownHero, BirthdayReveal, EventsSection, AdminPanel],
+  imports: [
+    KineticBackdrop,
+    PlayingCard,
+    CountdownHero,
+    BirthdayReveal,
+    EventsSection,
+    FloatingHeader,
+    AdminPanel,
+  ],
   templateUrl: './home-page.html',
   styleUrl: './home-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -33,6 +49,12 @@ export class HomePage {
   protected readonly progress = this.countdown.progress;
 
   protected readonly panelOpen = signal(false);
+
+  /** `undefined` no dia 15, quando a comemoração toma o lugar do contador. */
+  private readonly hero = viewChild(CountdownHero);
+
+  /** A carta que o cabeçalho vai arremessar quando ela descer a página. */
+  protected readonly heroCard = computed(() => this.hero()?.cardElement() ?? null);
 
   private taps = 0;
   private lastTapAt = 0;

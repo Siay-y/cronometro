@@ -1,0 +1,86 @@
+:host {
+  position: fixed;
+  inset-block-start: 0;
+  inset-inline: 0;
+  z-index: 40;
+
+  /* Recolhido: invisível e fora do caminho do dedo.
+     Só a opacidade muda, nunca a posição — é isso que permite medir o destino
+     da carta arremessada mesmo com o cabeçalho ainda escondido. */
+  opacity: 0;
+  pointer-events: none;
+  /* Curto de propósito: a barra precisa estar pronta antes de a carta pousar,
+     senão fica um buraco visível onde ela vai cair. */
+  transition: opacity var(--dur-2) var(--ease-out);
+}
+
+:host(.is-pinned) {
+  opacity: 1;
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  /* Mesma coluna do conteúdo, para a carta nascer alinhada com o resto. */
+  inline-size: min(100% - 2 * var(--sp-4), var(--shell-max));
+  margin-inline: auto;
+  padding-block: var(--sp-2);
+  padding-inline: var(--sp-1);
+}
+
+/* O vidro escuro vai no :host para atravessar a tela inteira, e não só a coluna. */
+:host::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(180deg, rgba(11, 6, 22, 0.82), rgba(11, 6, 22, 0.62));
+  backdrop-filter: blur(14px) saturate(1.3);
+  border-block-end: 1px solid var(--c-hairline);
+}
+
+.bar__card {
+  --card-w: 27px;
+  flex: none;
+  /* O `rotate` é uma propriedade à parte, então ele sobrevive à animação de
+     voo abaixo (que mexe só no `transform`) e continua valendo no repouso. */
+  rotate: -8deg;
+  filter: drop-shadow(0 4px 12px rgba(255, 45, 149, 0.4));
+}
+
+/* A chegada é o clone arremessado pousando aqui (ver o .ts): esta carta fica
+   invisível durante o voo e reaparece no mesmo quadro em que o clone sai.
+   Sem transição de propósito — qualquer esmaecida aqui vira um piscar, já que
+   por um instante nenhuma das duas cartas estaria inteira na tela. */
+
+/* No celular fica só a carta: a frase inteira roubava a largura da tela e
+   competia com o conteúdo logo abaixo. Ela volta a partir de 720px. */
+.bar__text {
+  display: none;
+  min-inline-size: 0;
+  font-size: clamp(0.72rem, 2.9vw, 0.95rem);
+  line-height: 1.35;
+  color: var(--c-text-muted);
+  letter-spacing: 0.01em;
+}
+
+.bar__text em {
+  font-size: 1.15em;
+  font-style: italic;
+}
+
+@media (min-width: 720px) {
+  .bar {
+    gap: var(--sp-4);
+    padding-block: var(--sp-3);
+  }
+
+  .bar__card {
+    --card-w: 33px;
+  }
+
+  .bar__text {
+    display: block;
+  }
+}

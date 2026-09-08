@@ -25,6 +25,9 @@
   border: 1px solid var(--c-hairline);
   background: linear-gradient(150deg, rgba(26, 15, 43, 0.9), rgba(11, 6, 22, 0.85));
   box-shadow: var(--shadow-raised);
+  /* Segurar o dedo na carta não pode selecionar texto nem abrir menu. */
+  user-select: none;
+  -webkit-touch-callout: none;
   transition:
     transform var(--dur-3) var(--ease-spring),
     border-color var(--dur-3) var(--ease-out),
@@ -50,9 +53,13 @@
 
 .card__emblem {
   --card-w: 62px;
+  /* Âncora do anel de carga e do clarão da detonação. */
+  position: relative;
   display: grid;
   place-items: center;
-  transition: transform var(--dur-3) var(--ease-spring);
+  transition:
+    transform var(--dur-3) var(--ease-spring),
+    filter 380ms var(--ease-out);
 }
 
 .card__body {
@@ -171,6 +178,103 @@
 
 .card.is-nudging {
   animation: nudge var(--dur-4) var(--ease-in-out);
+}
+
+/* --- Carga cinética -------------------------------------------------------
+   Ela pressiona e segura; a energia sobe pela borda da carta até detonar.
+   O preenchimento é uma transição de CSS (não um laço quadro a quadro), então
+   custa zero JavaScript enquanto carrega. A duração precisa bater com o
+   CHARGE_MS do componente.
+   -------------------------------------------------------------------------- */
+
+.ring {
+  position: absolute;
+  /* `inset: 0` preserva o 5:7 da carta, então o traço não distorce. */
+  inset: 0;
+  overflow: visible;
+  pointer-events: none;
+  fill: none;
+}
+
+.ring__track {
+  stroke: color-mix(in srgb, var(--accent) 30%, transparent);
+  stroke-width: 1.4;
+}
+
+.ring__fill {
+  stroke: var(--accent);
+  stroke-width: 2.6;
+  stroke-linejoin: round;
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  filter: drop-shadow(0 0 3px var(--accent));
+  /* Solta antes da hora: a energia escorre de volta, e mais rápido. */
+  transition: stroke-dashoffset 380ms var(--ease-out);
+}
+
+:host(.is-charging) .ring__fill {
+  stroke-dashoffset: 0;
+  transition-duration: 1200ms;
+  transition-timing-function: linear;
+}
+
+/* A carta esquenta junto com o anel. */
+:host(.is-charging) .card__emblem {
+  transform: scale(1.07);
+  filter: brightness(1.4) saturate(1.25);
+  transition-duration: 1200ms;
+  transition-timing-function: linear;
+}
+
+:host(.is-charging) .card {
+  border-color: var(--accent);
+  transform: none;
+}
+
+/* Clarão da detonação. */
+.flash {
+  position: absolute;
+  inset: -60%;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    #fff 0%,
+    color-mix(in srgb, var(--accent) 80%, transparent) 35%,
+    transparent 70%
+  );
+  opacity: 0;
+  pointer-events: none;
+}
+
+:host(.is-detonating) .flash {
+  animation: detonate 520ms var(--ease-expo) both;
+}
+
+:host(.is-detonating) .card__emblem {
+  animation: kick 520ms var(--ease-spring) both;
+}
+
+@keyframes detonate {
+  0% {
+    opacity: 0.95;
+    transform: scale(0.25);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2.3);
+  }
+}
+
+@keyframes kick {
+  0% {
+    transform: scale(1.07);
+  }
+  30% {
+    transform: scale(0.86);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 @media (min-width: 720px) {
