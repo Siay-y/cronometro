@@ -16,10 +16,24 @@ import {
 } from '../../../core/models/gift-event.model';
 import { ClockService } from '../../../core/services/clock.service';
 import { CountdownService } from '../../../core/services/countdown.service';
+import { LocalStorageService } from '../../../core/services/local-storage.service';
 import { GiftEventsStore } from '../../../core/state/gift-events.store';
 import { createId } from '../../../core/utils/id.util';
 import { DAY_MS, HOUR_MS, toLocalDateTimeInput } from '../../../core/utils/time.util';
 import { SchedulePipe } from '../../../shared/pipes/schedule.pipe';
+
+/** Prefixos gravados pela resposta dela (ver `LetterReply`). */
+const REPLY_PREFIX = 'mon-cher:resposta:';
+const REPLY_SENT_PREFIX = 'mon-cher:resposta-enviada:';
+
+/** Um textinho que ela escreveu no fim de uma carta. */
+interface HerNote {
+  /** O presente em que ela escreveu. */
+  readonly id: string;
+  readonly text: string;
+  /** `true` depois que ela bateu o carimbo no selo. */
+  readonly sent: boolean;
+}
 
 /** Formulário em edição. `id` nulo significa "carta nova". */
 interface GiftDraft {
@@ -55,9 +69,9 @@ function emptyDraft(): GiftDraft {
 /**
  * Painel escondido (5 toques no naipe do rodapé). Só para você.
  *
- * Faz três coisas: monta a lista de presentes, viaja no tempo para conferir
- * como cada carta vai se comportar, e exporta tudo como código para colar em
- * `gift-events.data.ts`.
+ * Faz quatro coisas: monta a lista de presentes, viaja no tempo para conferir
+ * como cada carta vai se comportar, exporta tudo como código para colar em
+ * `gift-events.data.ts`, e é aqui que se lê o que ela escreveu de volta.
  */
 @Component({
   selector: 'app-admin-panel',
@@ -71,6 +85,7 @@ export class AdminPanel {
   private readonly store = inject(GiftEventsStore);
   private readonly clock = inject(ClockService);
   private readonly countdown = inject(CountdownService);
+  private readonly storage = inject(LocalStorageService);
 
   readonly close = output<void>();
 
@@ -79,6 +94,14 @@ export class AdminPanel {
   protected readonly usingCustomList = this.store.usingCustomList;
   protected readonly timeTravelling = this.clock.timeTravelling;
   protected readonly now = this.clock.now;
+
+  /**
+   * O que ela escreveu no fim das cartas.
+   *
+   * Nada disso sai do aparelho dela, então esta lista só tem conteúdo no
+   * navegador em que ela escreveu. É lida uma vez, na abertura do painel.
+   */
+  protected readonly notes = signal<readonly HerNote[]>(this.readNotes());
 
   protected readonly draft = signal<GiftDraft>(emptyDraft());
   protected readonly editing = computed(() => this.draft().id !== null);
@@ -149,6 +172,22 @@ export class AdminPanel {
     } catch {
       this.announce('Não consegui copiar. Verifique a permissão do navegador.');
     }
+  }
+
+  /** Lê os textinhos guardados por ela, um por carta em que ela escreveu. */
+  private readNotes(): readonly HerNote[] {
+    return this.storage
+      .keys(REPLY_PREFIX)
+      .map((key) => {
+        const id = key.slice(REPLY_PREFIX.length);
+
+        return {
+          id,
+          text: this.storage.read(key, ''),
+          sent: this.storage.read(`${REPLY_SENT_PREFIX}${id}`, false),
+        };
+      })
+      .filter((note) => note.text.trim().length > 0);
   }
 
   // --- Viagem no tempo ------------------------------------------------------

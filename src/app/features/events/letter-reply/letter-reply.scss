@@ -1,0 +1,332 @@
+/* Tudo aqui vive dentro da folha de pergaminho da carta, então a tinta é a
+   mesma e não existe cara de formulário: é ela escrevendo no mesmo papel. */
+
+:host {
+  display: grid;
+  justify-items: center;
+  gap: var(--sp-3);
+  margin-block-start: var(--sp-4);
+  padding-block-start: var(--sp-5);
+  /* A linha picotada de onde se destaca o canhoto de uma carta. */
+  border-block-start: 1px dashed rgba(122, 72, 44, 0.4);
+}
+
+.reply__invite {
+  font-style: italic;
+  font-size: 1.02em;
+  color: #6b4a3a;
+  text-align: center;
+}
+
+.reply__sheet {
+  inline-size: 100%;
+}
+
+.reply__text {
+  display: block;
+  inline-size: 100%;
+  min-block-size: 140px;
+  padding: 0;
+  border: 0;
+  outline: none;
+  resize: vertical;
+  color: #2c1626;
+  font: inherit;
+  /* A pauta e a altura da linha precisam bater no mesmo número, senão a escrita
+     desliza para fora das linhas conforme o texto cresce. */
+  line-height: 28px;
+  background: repeating-linear-gradient(
+    180deg,
+    transparent 0 27px,
+    rgba(122, 72, 44, 0.28) 27px 28px
+  );
+}
+
+.reply__text::placeholder {
+  color: rgba(44, 22, 38, 0.34);
+  font-style: italic;
+}
+
+.reply__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  inline-size: 100%;
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  color: #8a6a52;
+}
+
+.reply__hint {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+
+/* --- O lacre de cera dela --------------------------------------------------
+   Mesmo ritual do resto do site: segurar até encher. A duração do anel bate
+   com o SEAL_MS do componente.
+   -------------------------------------------------------------------------- */
+
+.wax {
+  position: relative;
+  display: grid;
+  place-items: center;
+  inline-size: 64px;
+  block-size: 64px;
+  margin-block-start: var(--sp-2);
+  /* Segurar o dedo no lacre não pode selecionar nada nem abrir menu. */
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.wax:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.wax__blob {
+  inline-size: 46px;
+  block-size: 46px;
+  font-size: 1.15rem;
+  transition:
+    transform var(--dur-3) var(--ease-spring),
+    filter var(--dur-3) var(--ease-out);
+}
+
+.wax:not(:disabled):hover .wax__blob {
+  transform: scale(1.06);
+}
+
+/* A cera esquenta e derrete enquanto o dedo fica na tela. */
+:host(.is-sealing) .wax__blob {
+  transform: scale(1.16);
+  filter: brightness(1.35) saturate(1.2);
+  transition-duration: 1200ms;
+  transition-timing-function: linear;
+}
+
+.wax__ring {
+  position: absolute;
+  inset: 0;
+  fill: none;
+  pointer-events: none;
+  /* Começa às 12h em vez de às 3h. */
+  transform: rotate(-90deg);
+}
+
+.wax__track {
+  stroke: rgba(255, 45, 149, 0.2);
+  stroke-width: 2;
+}
+
+.wax__fill {
+  stroke: var(--c-magenta);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  filter: drop-shadow(0 0 4px rgba(255, 45, 149, 0.7));
+  /* Solta antes da hora: a cera esfria de volta, e mais rápido. */
+  transition: stroke-dashoffset 380ms var(--ease-out);
+}
+
+:host(.is-sealing) .wax__fill {
+  stroke-dashoffset: 0;
+  transition-duration: 1200ms;
+  transition-timing-function: linear;
+}
+
+/* --- Lacrada --------------------------------------------------------------- */
+
+.done {
+  display: grid;
+  justify-items: center;
+  gap: var(--sp-3);
+  inline-size: 100%;
+  text-align: center;
+}
+
+.done__seal {
+  inline-size: 52px;
+  block-size: 52px;
+  font-size: 1.3rem;
+  animation: waxStamp 520ms var(--ease-spring) both;
+}
+
+@keyframes waxStamp {
+  0% {
+    opacity: 0;
+    transform: scale(2.1) rotate(-18deg);
+  }
+  55% {
+    opacity: 1;
+    transform: scale(0.88) rotate(6deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+.done__note {
+  font-style: italic;
+  color: #6b4a3a;
+}
+
+/* O que ela escreveu continua à vista, dobrado como carta fechada. */
+.done__preview {
+  inline-size: 100%;
+  max-block-size: 8.5em;
+  overflow: hidden;
+  padding: var(--sp-3) var(--sp-4);
+  border-radius: 4px;
+  background: rgba(122, 72, 44, 0.09);
+  color: #3a1f30;
+  text-align: start;
+  white-space: pre-wrap;
+  /* Some para baixo, dando a entender que tem mais do que cabe na dobra. */
+  mask-image: linear-gradient(180deg, #000 62%, transparent);
+}
+
+/* --- O selo ----------------------------------------------------------------
+   O botão de enviar não é um botão: é um selo postal colado na carta. Pílula
+   magenta em cima de pergaminho ficava com cara de formulário, e nada no site
+   se parece com isso.
+   -------------------------------------------------------------------------- */
+
+.stamp {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 2px;
+  inline-size: 172px;
+  padding: var(--sp-3) var(--sp-4) var(--sp-2);
+  margin-block-start: var(--sp-2);
+  background: linear-gradient(158deg, #fffdf6, #f4e6cd);
+  border-radius: 3px;
+  color: #6b1338;
+  text-decoration: none;
+  box-shadow:
+    0 8px 20px rgba(60, 25, 45, 0.32),
+    0 0 0 1px rgba(122, 72, 44, 0.18);
+  /* Levemente torto, como selo colado com a mão. */
+  rotate: -1.5deg;
+  transition:
+    rotate var(--dur-3) var(--ease-spring),
+    translate var(--dur-3) var(--ease-spring),
+    box-shadow var(--dur-3) var(--ease-out);
+}
+
+/* O picote: a linha tracejada por dentro da borda do selo. */
+.stamp__perf {
+  position: absolute;
+  inset: 5px;
+  border: 2px dashed rgba(122, 72, 44, 0.55);
+  border-radius: 2px;
+  pointer-events: none;
+}
+
+.stamp__art {
+  font-family: var(--font-script);
+  font-size: 1.5rem;
+  line-height: 1;
+  filter: drop-shadow(0 0 6px rgba(255, 45, 149, 0.35));
+}
+
+.stamp__label {
+  font-family: var(--font-display);
+  font-size: 0.94rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #4a0f27;
+}
+
+.stamp__value {
+  font-family: var(--font-body);
+  font-size: 0.55rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(122, 72, 44, 0.75);
+}
+
+.stamp:hover,
+.stamp:focus-visible {
+  rotate: 0deg;
+  translate: 0 -3px;
+  box-shadow:
+    0 14px 28px rgba(60, 25, 45, 0.4),
+    0 0 0 1px rgba(122, 72, 44, 0.24),
+    0 0 22px rgba(255, 45, 149, 0.35);
+}
+
+.stamp:active {
+  translate: 0 1px;
+}
+
+/* O carimbo dos correios, que bate por cima do selo ao enviar. */
+.stamp__cancel {
+  position: absolute;
+  inset-block-start: 46%;
+  inset-inline-start: 50%;
+  inline-size: 132%;
+  translate: -50% -50%;
+  rotate: -13deg;
+  fill: none;
+  stroke: rgba(74, 15, 39, 0.66);
+  stroke-width: 3;
+  stroke-linecap: round;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.stamp.is-stamped .stamp__cancel {
+  animation: postmark 420ms var(--ease-spring) both;
+}
+
+/* O selo apanha do carimbo e se assenta. */
+.stamp.is-stamped {
+  animation: stampHit 420ms var(--ease-out) both;
+}
+
+@keyframes postmark {
+  0% {
+    opacity: 0;
+    transform: scale(2.4);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(0.92);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes stampHit {
+  0%,
+  100% {
+    scale: 1;
+  }
+  22% {
+    scale: 0.94;
+  }
+}
+
+.done__reopen {
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  color: #8a6a52;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color var(--dur-2) var(--ease-out);
+}
+
+.done__reopen:hover {
+  color: #2c1626;
+}

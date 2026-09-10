@@ -9,7 +9,7 @@ import {
 } from '@angular/core';
 import { LetterPhoto, SealedLetter } from '../../../core/models/gift-event.model';
 import { vibrate } from '../../../core/utils/haptics.util';
-import { Icon } from '../../../shared/ui/icon/icon';
+import { LetterReply } from '../letter-reply/letter-reply';
 
 /** O lacre estala e a aba levanta. Espelhado no SCSS. */
 const UNSEAL_MS = 860;
@@ -22,7 +22,7 @@ const INK_STEP_MS = 180;
 
 const SEAL_PULSE = 26;
 
-type LetterPhase = 'sealed' | 'unsealing' | 'rising' | 'open';
+type LetterPhase = 'sealed' | 'unsealing' | 'rising' | 'open' | 'sent';
 
 /** Uma foto na pilha do albuminho, já com o lugar dela calculado. */
 interface AlbumSlot {
@@ -48,7 +48,7 @@ interface AlbumSlot {
  */
 @Component({
   selector: 'app-letter-envelope',
-  imports: [Icon],
+  imports: [LetterReply],
   templateUrl: './letter-envelope.html',
   styleUrl: './letter-envelope.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -60,9 +60,13 @@ interface AlbumSlot {
 })
 export class LetterEnvelope {
   readonly letter = input.required<SealedLetter>();
+  /** Identifica a carta, para o rascunho da resposta dela não se misturar. */
+  readonly letterId = input('carta');
 
   protected readonly phase = signal<LetterPhase>('sealed');
   protected readonly opened = computed(() => this.phase() === 'open');
+  /** Ela mandou o textinho: a carta se fecha e fica o aviso no lugar dela. */
+  protected readonly posted = computed(() => this.phase() === 'sent');
 
   /** Cada linha em branco do corpo vira um parágrafo, como no card. */
   protected readonly paragraphs = computed(() =>
@@ -119,6 +123,8 @@ export class LetterEnvelope {
     () => this.albumDelay() + (this.photos().length ? INK_STEP_MS : 0),
   );
   protected readonly signDelay = computed(() => this.closingDelay() + INK_STEP_MS);
+  /** A folha em branco dela só aparece depois que a assinatura foi carimbada. */
+  protected readonly replyDelay = computed(() => this.signDelay() + 1200);
 
   private timers: ReturnType<typeof setTimeout>[] = [];
 
@@ -143,6 +149,12 @@ export class LetterEnvelope {
       setTimeout(() => this.phase.set('rising'), UNSEAL_MS),
       setTimeout(() => this.phase.set('open'), UNSEAL_MS + RISE_MS),
     );
+  }
+
+  /** A carta se dobra e se fecha quando o textinho dela vai embora. */
+  protected onSent(): void {
+    this.clearTimers();
+    this.phase.set('sent');
   }
 
   /** Passa a foto de cima para o fim da pilha. */

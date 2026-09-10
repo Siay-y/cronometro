@@ -50,6 +50,30 @@
     </div>
   </section>
 
+  <!-- O que ela escreveu de volta -->
+  @if (notes().length) {
+    <section class="block">
+      <h3 class="block__title">O textinho dela</h3>
+
+      <ul class="notes" role="list">
+        @for (note of notes(); track note.id) {
+          <li class="note">
+            <p class="note__meta">
+              {{ note.id }}
+              <em class="tag">{{ note.sent ? 'enviado' : 'ainda escrevendo' }}</em>
+            </p>
+            <p class="note__text">{{ note.text }}</p>
+          </li>
+        }
+      </ul>
+
+      <p class="block__hint">
+        O que ela escreveu no fim da carta. Fica guardado só no navegador dela, então isto aqui só
+        tem conteúdo no aparelho em que ela escreveu.
+      </p>
+    </section>
+  }
+
   <!-- Formulário -->
   <section class="block">
     <h3 class="block__title">{{ editing() ? 'Editar carta' : 'Nova carta' }}</h3>

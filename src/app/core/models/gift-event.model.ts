@@ -12,6 +12,20 @@ export interface LetterPhoto {
 }
 
 /**
+ * O convite para ela responder.
+ *
+ * Quando existe, o fim da carta ganha uma folha em branco: ela escreve, lacra
+ * com o próprio lacre de cera e o site vira aquilo numa mensagem pronta para
+ * mandar. É a única parte do site em que ela deixa de ser leitora.
+ */
+export interface ReplyInvite {
+  /** Convite escrito acima da folha em branco. */
+  readonly invite: string;
+  /** Sugestão apagada dentro da folha, enquanto ela não escreveu nada. */
+  readonly placeholder: string;
+}
+
+/**
  * Uma carta lacrada guardada dentro de um presente.
  *
  * Quando ela existe, a revelação ganha um envelope fechado e um botão: o lacre
@@ -33,6 +47,8 @@ export interface SealedLetter {
    * então dá para escrever a lista antes de os arquivos chegarem.
    */
   readonly photos?: readonly LetterPhoto[];
+  /** Convite para ela escrever de volta, no fim da folha. */
+  readonly reply?: ReplyInvite;
 }
 
 /**

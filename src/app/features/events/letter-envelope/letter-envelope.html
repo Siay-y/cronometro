@@ -1,4 +1,10 @@
-@if (!opened()) {
+@if (posted()) {
+  <div class="posted" animate.enter="anim-fade-in">
+    <span class="posted__seal wax-seal" aria-hidden="true">⚜</span>
+    <p class="posted__title">Textinho enviado.</p>
+    <p class="posted__note cajun">Gambit vai ler com muito carinho, Ma Cher.</p>
+  </div>
+} @else if (!opened()) {
   <!-- O envelope e o botão saem juntos, numa saída só: se o botão sumisse
        sozinho ao ser apertado, o painel encolheria no meio da animação. -->
   <div class="stage" animate.leave="stage-out">
@@ -10,20 +16,34 @@
       <span class="env__sheet"></span>
       <span class="env__front"></span>
       <span class="env__flap"></span>
-      <span class="env__seal">⚜</span>
+      <span class="env__seal wax-seal">⚜</span>
     </div>
 
-    <button
-      type="button"
-      class="btn btn--primary stage__open"
-      [disabled]="phase() !== 'sealed'"
-      (click)="unseal()"
-    >
-      <app-icon name="letter" /> {{ letter().cta }}
+    <!-- O botão é uma carta de baralho: em português a palavra é a mesma, e
+         essa é a moeda do site inteiro. Os dois piques nas pontas e a moldura
+         interna são o que faz o olho reconhecer uma carta na hora. -->
+    <button type="button" class="unseal" [disabled]="phase() !== 'sealed'" (click)="unseal()">
+      <span class="unseal__pip" aria-hidden="true">♠</span>
+      <span class="unseal__label">{{ letter().cta }}</span>
+      <span class="unseal__pip unseal__pip--flip" aria-hidden="true">♠</span>
+
+      <!-- A moldura interna se desenha sozinha quando o envelope chega. -->
+      <svg class="unseal__frame" viewBox="0 0 232 56" aria-hidden="true">
+        <rect class="unseal__track" x="5.5" y="5.5" width="221" height="45" rx="5" pathLength="100" />
+        <rect class="unseal__draw" x="5.5" y="5.5" width="221" height="45" rx="5" pathLength="100" />
+      </svg>
+
+      <span class="unseal__sheen" aria-hidden="true"></span>
     </button>
   </div>
 } @else {
-  <article class="sheet" role="note" aria-live="polite" animate.enter="sheet-in">
+  <article
+    class="sheet"
+    role="note"
+    aria-live="polite"
+    animate.enter="sheet-in"
+    animate.leave="sheet-fold"
+  >
     @for (paragraph of paragraphs(); track $index) {
       <p [style.animation-delay.ms]="420 + $index * 180">{{ paragraph }}</p>
     }
@@ -95,5 +115,15 @@
         </g>
       </svg>
     </p>
+
+    @if (letter().reply; as reply) {
+      <!-- E agora a mão troca de lado: a folha em branco dela. -->
+      <app-letter-reply
+        [invite]="reply"
+        [storageKey]="letterId()"
+        (sent)="onSent()"
+        [style.animation-delay.ms]="replyDelay()"
+      />
+    }
   </article>
 }

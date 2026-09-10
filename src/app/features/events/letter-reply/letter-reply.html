@@ -1,0 +1,80 @@
+<p class="reply__invite">{{ invite().invite }}</p>
+
+@if (!sealed()) {
+  <div class="reply__sheet">
+    <!-- A pauta é o fundo do próprio campo, e a altura da linha bate com ela:
+         o que ela digita cai em cima das linhas, como escrita no papel. -->
+    <textarea
+      class="reply__text"
+      rows="5"
+      aria-label="A sua resposta"
+      [value]="text()"
+      [attr.placeholder]="invite().placeholder"
+      (input)="write($any($event.target).value)"
+    ></textarea>
+  </div>
+
+  <div class="reply__foot">
+    <span class="reply__count">{{ words() }}</span>
+
+    <span class="reply__hint">
+      @if (canSeal()) {
+        <app-icon name="spark" /> segure o lacre
+      } @else {
+        escreva alguma coisinha primeiro
+      }
+    </span>
+  </div>
+
+  <button
+    type="button"
+    class="wax"
+    [disabled]="!canSeal()"
+    (click)="select()"
+    (pointerdown)="pressStart()"
+    (pointerup)="pressEnd()"
+    (pointerleave)="pressEnd()"
+    (pointercancel)="pressEnd()"
+  >
+    <span class="wax__blob wax-seal" aria-hidden="true">⚜</span>
+    <span class="sr-only">Segurar para lacrar a resposta</span>
+    <!-- Anel de cera: o preenchimento é uma transição de CSS, não um laço de
+         quadro a quadro. `pathLength` deixa o traço medir 100 unidades. -->
+    <svg class="wax__ring" viewBox="0 0 64 64" aria-hidden="true">
+      <circle class="wax__track" cx="32" cy="32" r="29" pathLength="100" />
+      <circle class="wax__fill" cx="32" cy="32" r="29" pathLength="100" />
+    </svg>
+  </button>
+} @else {
+  <div class="done" animate.enter="anim-fade-in">
+    <span class="done__seal wax-seal" aria-hidden="true">⚜</span>
+
+    <p class="done__note">
+      {{ wasSent() ? 'Textinho já enviado ao Gambit.' : 'Lacrada. Agora é só mandar.' }}
+    </p>
+    <p class="done__preview">{{ text() }}</p>
+
+    <button
+      type="button"
+      class="stamp"
+      [class.is-stamped]="stamped()"
+      [disabled]="wasSent()"
+      (click)="send()"
+    >
+      <span class="stamp__perf" aria-hidden="true"></span>
+      <span class="stamp__art" aria-hidden="true">♠</span>
+      <span class="stamp__label">Enviar Textinho</span>
+      <span class="stamp__value" aria-hidden="true">mon cher · 1926</span>
+
+      <!-- O carimbo dos correios, que bate por cima quando ela envia. -->
+      <svg class="stamp__cancel" viewBox="0 0 140 66" aria-hidden="true">
+        <ellipse cx="70" cy="33" rx="60" ry="27" />
+        <path d="M22 24h96M22 42h96" />
+      </svg>
+    </button>
+
+    <button type="button" class="done__reopen" (click)="reopen()">
+      quebrar o lacre e reescrever
+    </button>
+  </div>
+}

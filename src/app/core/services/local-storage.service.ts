@@ -30,6 +30,17 @@ export class LocalStorageService {
     }
   }
 
+  /** As chaves guardadas que começam com `prefix`, em ordem de gravação. */
+  keys(prefix: string): string[] {
+    if (!this.isBrowser) return [];
+
+    try {
+      return Object.keys(localStorage).filter((key) => key.startsWith(prefix));
+    } catch {
+      return [];
+    }
+  }
+
   remove(key: string): void {
     if (!this.isBrowser) return;
 

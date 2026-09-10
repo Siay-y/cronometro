@@ -8,7 +8,8 @@
 }
 
 .stage,
-.sheet {
+.sheet,
+.posted {
   grid-area: swap;
 }
 
@@ -133,13 +134,7 @@
   inset: 58% auto auto 50%;
   inline-size: 15%;
   aspect-ratio: 1;
-  display: grid;
-  place-items: center;
   translate: -50% -50%;
-  border-radius: 50%;
-  background: radial-gradient(circle at 32% 28%, #ff6fb6, var(--c-magenta-deep) 78%);
-  color: #ffe9f5;
-  font-family: var(--font-script);
   font-size: clamp(0.9rem, 4vw, 1.15rem);
   box-shadow:
     0 2px 8px rgba(0, 0, 0, 0.55),
@@ -165,14 +160,117 @@
   }
 }
 
-/* Apertado o botão, ele se apaga e deixa a cena para o envelope. */
-.stage__open {
+/* --- O botão de abrir -----------------------------------------------------
+   Uma carta de baralho, e não uma pílula: em português "carta" é a de jogar e
+   a de escrever, e é essa a moeda do site. Daí a proporção deitada de uma
+   carta na mão, os dois piques opostos nas pontas e a moldura interna.
+   -------------------------------------------------------------------------- */
+
+.unseal {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--sp-3);
+  inline-size: 232px;
+  block-size: 56px;
+  padding-inline: var(--sp-4);
+  /* Recorta a faixa de luz que atravessa a carta. */
+  overflow: hidden;
+  border-radius: 9px;
+  border: 1px solid var(--c-hairline-strong);
+  background: linear-gradient(158deg, var(--c-surface-2), var(--c-abyss) 70%);
+  box-shadow:
+    0 12px 28px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
   transition:
-    opacity var(--dur-2) var(--ease-out),
-    transform var(--dur-2) var(--ease-spring);
+    transform var(--dur-3) var(--ease-spring),
+    box-shadow var(--dur-3) var(--ease-out),
+    opacity var(--dur-2) var(--ease-out);
 }
 
-.stage__open:disabled {
+.unseal__pip {
+  font-family: var(--font-script);
+  font-size: 1.1rem;
+  line-height: 1;
+  color: var(--c-magenta);
+  text-shadow: 0 0 12px rgba(255, 45, 149, 0.7);
+}
+
+/* O pique de baixo de uma carta vem de cabeça para baixo. */
+.unseal__pip--flip {
+  rotate: 180deg;
+}
+
+.unseal__label {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--c-text);
+}
+
+.unseal__frame {
+  position: absolute;
+  inset: 0;
+  fill: none;
+  pointer-events: none;
+}
+
+.unseal__track {
+  stroke: rgba(255, 45, 149, 0.14);
+  stroke-width: 1;
+}
+
+.unseal__draw {
+  stroke: var(--c-magenta);
+  stroke-width: 1.2;
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  filter: drop-shadow(0 0 3px rgba(255, 45, 149, 0.6));
+  /* Desenha na entrada, e não só no hover: no celular não existe hover, e é
+     esse traço correndo que dá vida à carta parada. */
+  animation: frameDraw 900ms var(--ease-out) 500ms both;
+}
+
+@keyframes frameDraw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* A faixa de luz do foil, a mesma das cartas do baralho. */
+.unseal__sheen {
+  position: absolute;
+  inset-block: -40%;
+  inline-size: 34%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.45), transparent);
+  mix-blend-mode: overlay;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.unseal:hover,
+.unseal:focus-visible {
+  transform: translateY(-3px);
+  border-color: var(--c-magenta);
+  box-shadow:
+    0 18px 34px rgba(0, 0, 0, 0.55),
+    var(--glow-md);
+}
+
+.unseal:hover .unseal__sheen,
+.unseal:focus-visible .unseal__sheen {
+  opacity: 1;
+  animation: shimmerSweep 1.5s var(--ease-in-out) infinite;
+}
+
+.unseal:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* Apertada, ela se apaga e deixa a cena para o envelope. */
+.unseal:disabled {
   opacity: 0;
   transform: scale(0.94);
   pointer-events: none;
@@ -218,7 +316,8 @@
     inset 0 0 70px rgba(122, 72, 44, 0.14);
 }
 
-.sheet p {
+.sheet p,
+.sheet app-letter-reply {
   animation: riseIn var(--dur-4) var(--ease-out) both;
 }
 
@@ -434,6 +533,71 @@
     opacity: 0;
     transform: translateY(-16px) scale(0.94);
   }
+}
+
+/* E se dobra de volta quando o textinho dela vai embora. */
+.sheet-fold {
+  transform-origin: top center;
+  animation: sheetFold 620ms var(--ease-in-out) both;
+}
+
+@keyframes sheetFold {
+  0% {
+    opacity: 1;
+    transform: none;
+  }
+  100% {
+    opacity: 0;
+    transform: perspective(900px) rotateX(-74deg) scaleY(0.48);
+  }
+}
+
+/* --- Enviado ---------------------------------------------------------------
+   O que fica no lugar da carta depois que ela se fecha.
+   -------------------------------------------------------------------------- */
+
+.posted {
+  display: grid;
+  justify-items: center;
+  gap: var(--sp-3);
+  padding-block: var(--sp-6);
+  text-align: center;
+}
+
+.posted__seal {
+  inline-size: 62px;
+  block-size: 62px;
+  font-size: 1.5rem;
+  box-shadow:
+    0 6px 18px rgba(80, 10, 45, 0.55),
+    var(--glow-md);
+  animation: postedSeal 620ms var(--ease-spring) both;
+}
+
+@keyframes postedSeal {
+  0% {
+    opacity: 0;
+    transform: scale(2.2) rotate(-20deg);
+  }
+  58% {
+    opacity: 1;
+    transform: scale(0.9) rotate(7deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+.posted__title {
+  font-family: var(--font-display);
+  font-size: clamp(1.15rem, 5vw, 1.5rem);
+  letter-spacing: 0.05em;
+  color: var(--c-text);
+}
+
+.posted__note {
+  font-size: clamp(1rem, 4vw, 1.2rem);
 }
 
 /* A folha se desdobra para a frente, a partir da dobra de cima. */

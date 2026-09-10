@@ -71,6 +71,8 @@ export class EventReveal {
   );
 
   protected readonly hearts = signal<readonly Heart[]>([]);
+  /** A batida forte do botão, no toque dela. */
+  protected readonly beating = signal(false);
   private nextHeartId = 0;
 
   /**
@@ -95,6 +97,18 @@ export class EventReveal {
     }));
 
     this.hearts.update((current) => [...current, ...batch].slice(-MAX_HEARTS));
+    this.beating.set(true);
+  }
+
+  /**
+   * A batida forte se desliga sozinha ao fim da própria animação, para poder
+   * ser disparada de novo no toque seguinte. A onda é quem avisa: ela é a
+   * última a terminar.
+   */
+  protected calmDown(event: AnimationEvent): void {
+    if ((event.target as HTMLElement).classList.contains('thanks__wave')) {
+      this.beating.set(false);
+    }
   }
 
   /** Cada coração se remove ao fim da própria animação: sem timers. */

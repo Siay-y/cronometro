@@ -13,6 +13,21 @@
   backdrop-filter: blur(10px);
 }
 
+/* Lacre de cera: o disco magenta com o timbre no meio. Aparece na aba do
+   envelope, no lacre da resposta dela e no aviso de textinho enviado, então
+   mora aqui em vez de ser redesenhado em cada um. Quem usa define o tamanho. */
+.wax-seal {
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: radial-gradient(circle at 32% 28%, #ff6fb6, var(--c-magenta-deep) 78%);
+  color: #ffe9f5;
+  font-family: var(--font-script);
+  box-shadow:
+    0 3px 10px rgba(80, 10, 45, 0.45),
+    inset 0 -2px 6px rgba(0, 0, 0, 0.25);
+}
+
 /* Etiqueta pequena em caixa alta, com o espaçamento de pôster de quadrinho. */
 .eyebrow {
   font-family: var(--font-display);

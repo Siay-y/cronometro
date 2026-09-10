@@ -1,7 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { vi } from 'vitest';
 import { SealedLetter } from '../../../core/models/gift-event.model';
 import { LetterEnvelope } from './letter-envelope';
+import { LetterReply } from '../letter-reply/letter-reply';
 
 const UNSEAL_MS = 860;
 const RISE_MS = 900;
@@ -35,7 +37,7 @@ describe('LetterEnvelope', () => {
   });
 
   function button(): HTMLButtonElement {
-    return host.querySelector('.stage__open') as HTMLButtonElement;
+    return host.querySelector('.unseal') as HTMLButtonElement;
   }
 
   function sheet(): HTMLElement | null {
@@ -103,7 +105,7 @@ describe('LetterEnvelope', () => {
     openIt();
 
     expect(host.querySelector('.envelope')).toBeNull();
-    expect(host.querySelector('.stage__open')).toBeNull();
+    expect(host.querySelector('.unseal')).toBeNull();
   });
 
   it('escreve a tinta de cima para baixo, o fecho depois do texto', () => {
@@ -203,6 +205,32 @@ describe('LetterEnvelope', () => {
     // Sobra uma foto só, e nenhum ícone de imagem quebrada no meio da carta.
     expect(host.querySelectorAll('.album__frame').length).toBe(1);
     expect(host.querySelector('.album__count')).toBeNull();
+  });
+
+  it('não convida ninguém a responder quando a carta não pede resposta', () => {
+    openIt();
+
+    expect(host.querySelector('app-letter-reply')).toBeNull();
+  });
+
+  it('fecha a carta e avisa quando o textinho dela vai embora', () => {
+    fixture.componentRef.setInput('letter', {
+      ...LETTER,
+      reply: { invite: 'Sua vez.', placeholder: '...' },
+    });
+    openIt();
+
+    const reply = fixture.debugElement.query(By.directive(LetterReply))
+      .componentInstance as LetterReply;
+
+    expect(reply).toBeTruthy();
+    reply.sent.emit();
+    fixture.detectChanges();
+
+    expect(host.querySelector('.posted')).toBeTruthy();
+    // Frouxo de propósito: o texto do aviso é seu para reescrever.
+    expect(host.textContent).toContain('Textinho enviado');
+    expect(host.textContent).toContain('ler com muito carinho');
   });
 
   it('não deixa temporizador solto se ela fechar no meio da abertura', () => {

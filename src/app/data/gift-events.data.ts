@@ -94,6 +94,12 @@ export const GIFT_EVENTS: readonly GiftEvent[] = [
         { src: '/fotos/foto-2.jpg', alt: 'Uma foto nossa', caption: 'Te amo...' },
         { src: '/fotos/foto-3.jpg', alt: 'Uma foto nossa', caption: 'Com todo o meu coração e alma.' },
       ],
+      // O convite para ela responder, no fim da folha. Tire este bloco e a
+      // folha em branco some junto.
+      reply: {
+        invite: 'E agora é a sua vez, Mon Cher. Escreve aqui, que eu vou guardar.',
+        placeholder: 'pode ser uma linha só...',
+      },
     },
     // ↑↑↑ ESCREVA AQUI ↑↑↑
   },
