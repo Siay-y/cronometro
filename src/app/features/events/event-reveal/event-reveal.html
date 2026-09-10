@@ -22,9 +22,18 @@
     }
   </div>
 
-  <footer class="panel__foot">
+  @if (event().letter; as letter) {
+    <app-letter-envelope [letter]="letter" />
+  }
+
+  <footer class="panel__foot" [class.panel__foot--solo]="!!event().letter">
     <button type="button" class="thanks" (click)="cheer($event)">Merci :&gt;</button>
-    <p class="cajun panel__sign">{{ config.signature }}</p>
+
+    <!-- Um presente com carta já foi assinado dentro dela: repetir a assinatura
+         logo abaixo do "Gambit" da folha soava como duas despedidas seguidas. -->
+    @if (!event().letter) {
+      <p class="cajun panel__sign">{{ config.signature }}</p>
+    }
   </footer>
 </article>
 

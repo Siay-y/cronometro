@@ -1,0 +1,15 @@
+As fotos que vao dentro da carta lacrada (gift-05).
+
+Coloque tres arquivos aqui, com exatamente estes nomes:
+
+  foto-1.jpg
+  foto-2.jpg
+  foto-3.jpg
+
+Elas aparecem empilhadas no fim da carta, como um albuminho: clicar na de cima
+manda ela para o fim da pilha.
+
+Se o nome ou a extensao forem outros (.png, por exemplo), edite a lista
+`photos` do gift-05 em src/app/data/gift-events.data.ts, junto com as legendas.
+
+Enquanto um arquivo nao existir, aquela foto nao entra na pilha. Nada quebra.

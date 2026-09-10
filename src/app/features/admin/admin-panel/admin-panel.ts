@@ -8,7 +8,12 @@ import {
   signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { GiftAccent, GiftEvent, GiftEventView } from '../../../core/models/gift-event.model';
+import {
+  GiftAccent,
+  GiftEvent,
+  GiftEventView,
+  SealedLetter,
+} from '../../../core/models/gift-event.model';
 import { ClockService } from '../../../core/services/clock.service';
 import { CountdownService } from '../../../core/services/countdown.service';
 import { GiftEventsStore } from '../../../core/state/gift-events.store';
@@ -26,6 +31,12 @@ interface GiftDraft {
   accent: GiftAccent;
   opensAt: string;
   durationMinutes: number;
+  /**
+   * A carta lacrada não se edita por aqui: ela viaja junto só para sobreviver
+   * ao salvamento. Sem isto, editar a data de um presente pelo painel apagaria
+   * em silêncio o envelope escrito no arquivo de dados.
+   */
+  letter?: SealedLetter;
 }
 
 function emptyDraft(): GiftDraft {
@@ -83,8 +94,9 @@ export class AdminPanel {
   }
 
   protected edit(view: GiftEventView): void {
-    const { id, title, teaser, message, icon, accent, opensAt, durationMinutes } = view.event;
-    this.draft.set({ id, title, teaser, message, icon, accent, opensAt, durationMinutes });
+    const { id, title, teaser, message, icon, accent, opensAt, durationMinutes, letter } =
+      view.event;
+    this.draft.set({ id, title, teaser, message, icon, accent, opensAt, durationMinutes, letter });
   }
 
   protected resetDraft(): void {
@@ -104,6 +116,7 @@ export class AdminPanel {
       accent: draft.accent,
       opensAt: draft.opensAt,
       durationMinutes: Math.max(1, Math.round(draft.durationMinutes)),
+      ...(draft.letter ? { letter: draft.letter } : {}),
     };
 
     this.store.upsert(event);

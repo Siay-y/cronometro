@@ -11,6 +11,10 @@ import { GiftEvent } from '../core/models/gift-event.model';
  *                      "lembrança": continua acessível, só sai dos holofotes.
  *                      (1 dia = 1440, 2 dias = 2880.)
  *  • `accent`          'magenta' | 'violet' | 'gold'.
+ *  • `letter`          opcional. Quando existe, a revelação ganha um envelope
+ *                      lacrado: ela aperta o botão, o lacre estala, a aba
+ *                      levanta e o papel sai de dentro. É onde vão os textos
+ *                      longos, que não caberiam no `message`.
  *
  *  Dica: dá para montar tudo pelo painel (5 toques no naipe do rodapé) e usar
  *  o botão "Copiar como código" para colar a lista pronta aqui.
@@ -62,14 +66,36 @@ export const GIFT_EVENTS: readonly GiftEvent[] = [
   },
   {
     id: 'gift-05',
-    title: 'Um bilhete escondido',
-    teaser: 'Tem algo esperando por você em algum lugar da casa.',
+    title: 'Uma cartinha para você',
+    teaser: 'Fechada com cera. Só você pode quebrar o lacre.',
     message:
-      'Existe um bilhete escrito à mão escondido em um lugar que só você usa todo dia.\n\nNão vou dizer onde. Mas você vai encontrar hoje, e vai sorrir sozinha quando encontrar.\n\nEu conheço esse sorriso.',
+      'Espero muito que goste desse presentinho, Mon Cher.\n\nEscrevi essa cartinha pensando em cada palavra, quero que se sinta abraça e muito amada por mim nesse momento :>.\n\nEssa cartinha fica guardada aqui, então você pode voltar e abrir de novo sempre que quiser.',
     icon: '💌',
     accent: 'magenta',
     opensAt: '2026-09-10T18:30',
     durationMinutes: 2880,
+    letter: {
+      cta: 'Abrir a carta',
+      body:
+        'Bonjour, Mon Cher,\n\n' +
+        'Espero muito que esteja se sentindo bem agora, fica bem confortável porque vou falar bastante nessa cartinha para ti.\n\n' +
+        'Seu aniversário está quase chegando, eu fico extremamente feliz e grato por poder te proporcionar tanta coisa legal e que te faz se sentir amada, protegida e muito bem cuidada :>.\n\n' +
+        'O tempo passou muito rápido, mas eu me lembro de cada segundinho perto de você, é tudo tão calmo, tudo tão bonito, ao seu lado eu sinto que as coisas fazem muito mais sentido, que as cores tem muito mais vida, e que esse tempinho ainda vai durar muito, vai durar o nosso para sempre.\n\n' +
+        'Você é uma mulher tão maravilhosa que nem mesmo se eu escrevesse livros sobre os meus sentimentos por ti seriam capazes de dizer tudo que eu sinto, vejo e amo. Seu jeitinho doce ao meu lado, suas brincadeiras, seu jeito de se vestir, seu perfume, tudo é perfeito e único.\n\n' +
+        'Sempre vou estar do seu ladinho, eu quero cuidar de você, dos seus sentimentos, daquilo que importa para você, cuidar dos seus medos, das nossas memórias juntinhos e com certeza do seu coraçãozinho tão grande e cheio de pureza.\n\n' +
+        'Sei que errei algumas vezes com você, mas eu quero ser sempre o seu lugar seguro, quero que se sinto muito bem comigo, que não tenha medo de estar ao meu lado e ser você, essa princesinha tão brilhante, só de pensar em você e de estar escrevendo essa carta já sinto uma felicidade gigante no meu peito, porque eu sei o quanto você importa para mim, mon Amour.\n\n' +
+        'Muito obrigado por sempre me amar do melhor jeitinho, do seu jeitinho. Eu tenho um orgulho tão imenso de ti, das coisinhas que faz e sempre quis fazer, de tudo. Você me inspira todos os dias a ser um homem melhor, para mim, para você, por nós. Me inspira em sempre seguir em frente mesmo quando tudo está contra.\n\n' +
+        'Você é e sempre será a minha mulher, aquela que eu darei minha vida se for preciso, e que eu amarei com todo o meu coração, Deus sempre vai estar juntinho a nós, então você tem muita proteção além de mim ao seu lado Cher.\n\n' +
+        'Beijinho*. Mon Amour. Eu te amo mucho, mucho, mucho, e vou estar bem aqui do seu ladinho para ver, uma por uma, cada coisa linda que ainda está vindo para você e pela a gente. te amando incondicionalmente.',
+      closing: 'Assinado, votre Cajun',
+      signature: 'Gambit',
+      photos: [
+        { src: '/fotos/foto-1.jpg', alt: 'Uma foto nossa', caption: 'Eu...' },
+        { src: '/fotos/foto-2.jpg', alt: 'Uma foto nossa', caption: 'Te amo...' },
+        { src: '/fotos/foto-3.jpg', alt: 'Uma foto nossa', caption: 'Com todo o meu coração e alma.' },
+      ],
+    },
+    // ↑↑↑ ESCREVA AQUI ↑↑↑
   },
   {
     id: 'gift-06',

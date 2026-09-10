@@ -1,0 +1,99 @@
+@if (!opened()) {
+  <!-- O envelope e o botão saem juntos, numa saída só: se o botão sumisse
+       sozinho ao ser apertado, o painel encolheria no meio da animação. -->
+  <div class="stage" animate.leave="stage-out">
+    <!-- A ordem aqui É a ordem das camadas, da mais atrás para a mais à frente.
+         O papel fica entre o fundo e o bolso da frente, que é onde papel fica
+         dentro de envelope: o V da frente passa na frente dele. -->
+    <div class="envelope" aria-hidden="true">
+      <span class="env__body"></span>
+      <span class="env__sheet"></span>
+      <span class="env__front"></span>
+      <span class="env__flap"></span>
+      <span class="env__seal">⚜</span>
+    </div>
+
+    <button
+      type="button"
+      class="btn btn--primary stage__open"
+      [disabled]="phase() !== 'sealed'"
+      (click)="unseal()"
+    >
+      <app-icon name="letter" /> {{ letter().cta }}
+    </button>
+  </div>
+} @else {
+  <article class="sheet" role="note" aria-live="polite" animate.enter="sheet-in">
+    @for (paragraph of paragraphs(); track $index) {
+      <p [style.animation-delay.ms]="420 + $index * 180">{{ paragraph }}</p>
+    }
+
+    @if (album().length) {
+      <!-- O albuminho que veio dentro do envelope. Clicar manda a foto de cima
+           para o fim da pilha, como quem passa retrato na mão. -->
+      <figure class="album" [style.animation-delay.ms]="albumDelay()">
+        <button
+          type="button"
+          class="album__stack"
+          [attr.aria-label]="counter() ? 'Ver a próxima foto' : 'Foto guardada na carta'"
+          (click)="nextPhoto()"
+        >
+          @for (slot of album(); track slot.photo.src) {
+            <span
+              class="album__frame"
+              [class.is-top]="slot.depth === 0"
+              [style.rotate]="slot.rotate"
+              [style.translate]="slot.translate"
+              [style.z-index]="slot.zIndex"
+            >
+              <img
+                [src]="slot.photo.src"
+                [alt]="slot.photo.alt"
+                (error)="dropPhoto(slot.photo.src)"
+              />
+            </span>
+          }
+        </button>
+
+        <figcaption class="album__caption" aria-live="polite">
+          {{ caption() }}
+          @if (counter()) {
+            <span class="album__count">{{ counter() }}</span>
+          }
+        </figcaption>
+      </figure>
+    }
+
+    <p class="sheet__closing" [style.animation-delay.ms]="closingDelay()">
+      {{ letter().closing }}
+    </p>
+
+    <p class="sheet__sign" [style.animation-delay.ms]="signDelay()">
+      <!-- O nome não aparece: ele é escrito. A tinta corre da esquerda para a
+           direita com a ponta da caneta correndo junto, na frente dela. -->
+      <span class="sign__name" [style.animation-delay.ms]="signDelay()">
+        {{ letter().signature }}
+      </span>
+
+      <svg class="sheet__flourish" viewBox="0 0 210 44" aria-hidden="true">
+        <!-- O floreio se desenha sozinho: `pathLength` faz o traço medir 100
+             unidades, e o tracejado corre de 100 a 0. -->
+        <path
+          class="flourish__swash"
+          pathLength="100"
+          d="M6 27C36 9 70 39 104 25s44-9 64-4"
+          [style.animation-delay.ms]="signDelay() + 240"
+        />
+
+        <!-- E o espadilha é carimbado no fim, quando a tinta já secou. -->
+        <g transform="translate(188 21) scale(0.62)">
+          <path
+            class="flourish__spade"
+            d="M0-13C6-6 14-1 14 6c0 6-6 8-10 4 1 5 3 7 6 9H-10c3-2 5-4 6-9-4 4-10 2-10-4 0-7 8-12 14-19Z"
+            [style.animation-delay.ms]="signDelay() + 880"
+          />
+        </g>
+      </svg>
+    </p>
+  </article>
+}

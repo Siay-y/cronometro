@@ -51,6 +51,34 @@ describe('EventReveal', () => {
     expect(foot.querySelector('.panel__sign')).toBeTruthy();
   });
 
+  it('não mostra envelope nenhum num presente sem carta', () => {
+    expect(host.querySelector('app-letter-envelope')).toBeNull();
+  });
+
+  it('guarda o envelope entre a mensagem e a assinatura quando o presente tem carta', () => {
+    fixture.componentRef.setInput(
+      'view',
+      describeGiftEvent(
+        {
+          ...EVENT,
+          letter: { cta: 'Abrir a carta', body: 'Oi.', closing: 'Teu,', signature: 'Gambit' },
+        },
+        parseLocalDateTime(EVENT.opensAt) + 60_000,
+        false,
+      ),
+    );
+    fixture.detectChanges();
+
+    const envelope = host.querySelector('app-letter-envelope');
+
+    expect(envelope).toBeTruthy();
+    expect(envelope!.previousElementSibling?.classList.contains('panel__message')).toBe(true);
+    expect(envelope!.nextElementSibling?.classList.contains('panel__foot')).toBe(true);
+    // A carta já se assina por dentro: o painel não repete a despedida.
+    expect(host.querySelector('.panel__sign')).toBeNull();
+    expect(host.querySelector('.panel__foot--solo')).toBeTruthy();
+  });
+
   it('não solta coração nenhum antes do clique', () => {
     expect(hearts().length).toBe(0);
   });

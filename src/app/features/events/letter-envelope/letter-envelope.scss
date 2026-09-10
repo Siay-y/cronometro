@@ -1,0 +1,457 @@
+:host {
+  /* Envelope e folha dividem a mesma célula: a troca acontece no lugar, sem a
+     folha nascer embaixo do envelope que ainda está saindo e depois pular. */
+  display: grid;
+  grid-template-areas: 'swap';
+  inline-size: 100%;
+  margin-block-start: var(--sp-3);
+}
+
+.stage,
+.sheet {
+  grid-area: swap;
+}
+
+.stage {
+  display: grid;
+  justify-items: center;
+  gap: var(--sp-5);
+  align-content: start;
+  /* Espaço vago em cima para o papel ter para onde subir: a folha sobe uns
+     63px, e entre isto e a margem do bloco sobram uns 70px livres antes do
+     texto da mensagem. Sem essa folga, o que era papel saindo do envelope
+     virava papel atravessando o texto. */
+  padding-block-start: var(--sp-7);
+}
+
+/* --- O envelope -----------------------------------------------------------
+   Quem manda na ordem das camadas é a ordem do HTML, e mais nada.
+
+   A primeira versão empilhava as peças em profundidade (`translateZ`) dentro de
+   um espaço `preserve-3d` e contava com a ordenação 3D do navegador para o
+   papel ficar atrás do corpo. Ordenação 3D é frágil: basta uma propriedade de
+   agrupamento numa peça (e duas delas usam `clip-path`) para o plano ser
+   achatado e a pintura voltar a seguir o HTML. Então agora ela segue o HTML
+   desde o começo, que é previsível em qualquer lugar.
+   -------------------------------------------------------------------------- */
+
+.envelope {
+  position: relative;
+  inline-size: min(100%, 290px);
+  aspect-ratio: 8 / 5;
+  /* Só para dar volume ao giro da aba. */
+  perspective: 900px;
+}
+
+/* Cada peça é listada pelo nome, sem uma regra `.envelope > *` em comum.
+   Com a encapsulação de estilo do Angular, `.envelope > *` vira
+   `.envelope[ngcontent] > *[ngcontent]`: três seletores contra os dois de
+   `.env__seal[ngcontent]`. O `inset: 0` do grupo ganhava por especificidade e
+   atirava o lacre para o canto de cima, por mais que a regra dele viesse
+   depois. */
+.env__body,
+.env__sheet,
+.env__front,
+.env__flap {
+  position: absolute;
+  inset: 0;
+}
+
+.env__body {
+  border-radius: 10px;
+  border: 1px solid var(--c-hairline-strong);
+  background: linear-gradient(158deg, var(--c-surface-2), var(--c-night));
+  box-shadow: var(--shadow-float);
+}
+
+/* O papel fica entre o fundo e o bolso da frente. Guardado ele some, porque a
+   aba e o bolso se encaixam sem folga nenhuma (ver o `clip-path` de cada um);
+   aberto, ele aparece pela boca do V e sobe por trás dela, com a frente do
+   envelope passando na frente do pé da folha. É esse cruzamento que faz o
+   papel parecer que estava lá dentro, e não encostado atrás. Pautado, para
+   parecer escrito. */
+.env__sheet {
+  inset: 12% 8% 12%;
+  border-radius: 4px 4px 2px 2px;
+  background:
+    repeating-linear-gradient(180deg, transparent 0 11px, rgba(92, 42, 70, 0.18) 11px 12px),
+    var(--grad-parchment);
+  box-shadow: 0 -8px 18px rgba(0, 0, 0, 0.4);
+  transition: transform var(--dur-4) var(--ease-out);
+}
+
+:host(.is-rising) .env__sheet {
+  /* Sobe do bolso e desencosta um pouco, como papel puxado com a mão. */
+  transform: translateY(-46%) rotate(-2deg);
+}
+
+/* A frente é o bolso em V que segura o papel.
+
+   O V dela nasce nos cantos de cima (0 e 100%, e não 6%) para encostar exato na
+   borda da aba, que desce dos mesmos cantos até o mesmo ponto do meio. As duas
+   peças ladrilham o retângulo inteiro sem sobra: era a folga entre elas que
+   deixava o papel espiar por duas frestas em diagonal com o envelope fechado.
+
+   A sombra segue o recorte (é `drop-shadow`, não `box-shadow`), então a boca do
+   bolso projeta sombra sobre a folha que sai por trás dela. */
+.env__front {
+  clip-path: polygon(0 100%, 0 0, 50% 62%, 100% 0, 100% 100%);
+  border-radius: 10px;
+  background: linear-gradient(178deg, var(--c-surface-2), var(--c-surface));
+  filter: drop-shadow(0 -3px 7px rgba(0, 0, 0, 0.55));
+}
+
+.env__flap {
+  block-size: 62%;
+  transform: rotateX(0deg);
+  transform-origin: top center;
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  border-radius: 10px 10px 0 0;
+  background: linear-gradient(180deg, var(--c-surface), var(--c-surface-2));
+  transition:
+    transform 620ms var(--ease-in-out) 200ms,
+    /* Some depois de passar da vertical. Uma aba com dobradiça em cima sempre
+       termina de pé, e de pé ela é um triângulo escuro plantado por cima do
+       texto que está acima do envelope, com o papel subindo atrás dela.
+       Apagando na volta, ela lê como aba que caiu para trás, e o papel sobe
+       para um espaço limpo. */ opacity 300ms linear 520ms;
+}
+
+:host(.is-unsealed) .env__flap {
+  transform: rotateX(-176deg);
+  opacity: 0;
+}
+
+/* O lacre de cera, na ponta da aba. Fica fora dela de propósito: estala e some
+   antes de a aba se mexer, em vez de girar junto. */
+.env__seal {
+  position: absolute;
+  z-index: 1;
+  /* Num atalho só (topo, direita, base, esquerda) para não depender da ordem
+     entre `inset` e as propriedades lógicas. Bem na ponta da aba, que desce
+     até 62% do envelope. */
+  inset: 58% auto auto 50%;
+  inline-size: 15%;
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  translate: -50% -50%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 32% 28%, #ff6fb6, var(--c-magenta-deep) 78%);
+  color: #ffe9f5;
+  font-family: var(--font-script);
+  font-size: clamp(0.9rem, 4vw, 1.15rem);
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.55),
+    var(--glow-sm);
+}
+
+:host(.is-unsealed) .env__seal {
+  animation: sealBreak 420ms var(--ease-expo) both;
+}
+
+@keyframes sealBreak {
+  0% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+  40% {
+    transform: scale(1.32) rotate(-16deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.36) rotate(24deg);
+    opacity: 0;
+  }
+}
+
+/* Apertado o botão, ele se apaga e deixa a cena para o envelope. */
+.stage__open {
+  transition:
+    opacity var(--dur-2) var(--ease-out),
+    transform var(--dur-2) var(--ease-spring);
+}
+
+.stage__open:disabled {
+  opacity: 0;
+  transform: scale(0.94);
+  pointer-events: none;
+}
+
+/* --- A folha --------------------------------------------------------------- */
+
+.sheet {
+  position: relative;
+  display: grid;
+  gap: var(--sp-4);
+  inline-size: 100%;
+  padding: clamp(var(--sp-5), 6vw, var(--sp-7)) clamp(var(--sp-4), 5vw, var(--sp-6));
+  text-align: start;
+  border-radius: 6px;
+  /* Os dois vincos de onde ela foi dobrada em três para caber no envelope. */
+  background:
+    linear-gradient(
+      180deg,
+      transparent calc(33.3% - 1px),
+      rgba(122, 72, 44, 0.16) 33.3%,
+      transparent calc(33.3% + 1px)
+    ),
+    linear-gradient(
+      180deg,
+      transparent calc(66.6% - 1px),
+      rgba(122, 72, 44, 0.16) 66.6%,
+      transparent calc(66.6% + 1px)
+    ),
+    /* Losangos de baralho no papel, no limite do visível: dá textura de papel
+       de carta sem virar estampa e sem disputar com o que está escrito. */
+      repeating-linear-gradient(45deg, rgba(122, 72, 44, 0.05) 0 1px, transparent 1px 13px),
+    repeating-linear-gradient(-45deg, rgba(122, 72, 44, 0.05) 0 1px, transparent 1px 13px),
+    linear-gradient(152deg, #f8eeda 0%, #ecdabb 100%);
+  color: #2c1626;
+  font-family: var(--font-script);
+  font-size: clamp(1.06rem, 4.2vw, 1.3rem);
+  line-height: 1.72;
+  /* Evita a última linha de um parágrafo sozinha com uma palavra só. */
+  text-wrap: pretty;
+  box-shadow:
+    var(--shadow-float),
+    inset 0 0 70px rgba(122, 72, 44, 0.14);
+}
+
+.sheet p {
+  animation: riseIn var(--dur-4) var(--ease-out) both;
+}
+
+/* --- O albuminho ----------------------------------------------------------
+   As fotos que vieram dentro do envelope, empilhadas como retrato na mesa.
+   -------------------------------------------------------------------------- */
+
+.album {
+  display: grid;
+  justify-items: center;
+  gap: var(--sp-3);
+  margin-block: var(--sp-3);
+  animation: riseIn var(--dur-4) var(--ease-out) both;
+}
+
+.album__stack {
+  position: relative;
+  inline-size: min(230px, 68%);
+  aspect-ratio: 1;
+  /* Espaço para as fotas de baixo aparecerem tortas por fora da de cima. */
+  margin-block-end: var(--sp-2);
+}
+
+.album__frame {
+  position: absolute;
+  inset: 0;
+  display: block;
+  /* Moldura de retrato: a tarja de baixo é mais larga, como polaroide. */
+  padding: 8px 8px 26px;
+  background: #fffdf6;
+  border-radius: 3px;
+  box-shadow:
+    0 12px 24px rgba(52, 20, 40, 0.38),
+    0 0 0 1px rgba(92, 42, 70, 0.12);
+  transition:
+    rotate var(--dur-3) var(--ease-spring),
+    translate var(--dur-3) var(--ease-spring),
+    filter var(--dur-3) var(--ease-out);
+}
+
+.album__frame img {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+  border-radius: 2px;
+  /* Cor de espera, para o buraco não piscar branco enquanto a foto carrega. */
+  background: #e3d6c0;
+}
+
+/* As de baixo ficam um tom mais apagadas, como foto na sombra da de cima. */
+.album__frame:not(.is-top) {
+  filter: brightness(0.82) saturate(0.9);
+}
+
+.album__stack:hover .album__frame.is-top,
+.album__stack:focus-visible .album__frame.is-top {
+  translate: 0 -4px;
+}
+
+.album__stack:focus-visible {
+  outline: 2px solid var(--c-magenta);
+  outline-offset: 8px;
+  border-radius: 6px;
+}
+
+.album__stack:active .album__frame.is-top {
+  rotate: 3deg;
+}
+
+.album__caption {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  font-size: 0.86em;
+  font-style: italic;
+  color: #6b4a3a;
+  text-align: center;
+}
+
+.album__count {
+  font-family: var(--font-body);
+  font-style: normal;
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #8a6a52;
+}
+
+.sheet__closing {
+  margin-block-start: var(--sp-2);
+  font-size: 1.06em;
+}
+
+/* Colada no fecho, como numa carta de verdade: a assinatura vem logo abaixo
+   do "Sempre teu," e não a um parágrafo de distância dele. */
+.sheet__sign {
+  display: grid;
+  justify-items: start;
+  gap: 2px;
+  margin-block-start: calc(var(--sp-4) * -1);
+  font-size: clamp(1.9rem, 8.5vw, 2.5rem);
+  line-height: 1.1;
+  color: #6b1338;
+  rotate: -2.5deg;
+}
+
+/* O nome se escreve: a tinta é revelada da esquerda para a direita, em vez de
+   o texto simplesmente surgir pronto. */
+.sign__name {
+  position: relative;
+  display: inline-block;
+  animation: inkWrite 820ms var(--ease-out) both;
+}
+
+/* A ponta da caneta, correndo na frente da tinta. O recorte do nome corta ela
+   ao meio de propósito: é o ponto exato onde a letra está nascendo. */
+.sign__name::after {
+  content: '';
+  position: absolute;
+  inset-block: 6% 0;
+  inline-size: 2px;
+  border-radius: var(--r-pill);
+  background: linear-gradient(180deg, transparent, var(--c-magenta), transparent);
+  box-shadow: 0 0 10px 2px rgba(255, 45, 149, 0.7);
+  opacity: 0;
+  animation: inkPen 820ms var(--ease-out) both;
+  /* Herda o atraso escrito no elemento pai, que vem do componente. */
+  animation-delay: inherit;
+}
+
+@keyframes inkWrite {
+  from {
+    clip-path: inset(-18% 100% -28% -6%);
+  }
+  to {
+    clip-path: inset(-18% -14% -28% -6%);
+  }
+}
+
+@keyframes inkPen {
+  0% {
+    left: 0;
+    opacity: 0;
+  }
+  14% {
+    opacity: 1;
+  }
+  86% {
+    opacity: 1;
+  }
+  100% {
+    left: 100%;
+    opacity: 0;
+  }
+}
+
+.sheet__flourish {
+  inline-size: min(215px, 74%);
+  block-size: auto;
+  color: #6b1338;
+  overflow: visible;
+}
+
+.flourish__swash {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  animation: inkStroke 900ms var(--ease-out) both;
+}
+
+/* O espadilha é batido no fim, como quem carimba a assinatura. */
+.flourish__spade {
+  fill: currentColor;
+  transform-box: fill-box;
+  transform-origin: center;
+  filter: drop-shadow(0 0 5px rgba(255, 45, 149, 0.45));
+  animation: spadeStamp 520ms var(--ease-spring) both;
+}
+
+@keyframes inkStroke {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes spadeStamp {
+  0% {
+    opacity: 0;
+    transform: scale(0.2) rotate(-28deg);
+  }
+  62% {
+    opacity: 1;
+    transform: scale(1.16) rotate(7deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+/* --- Troca do envelope pela folha ------------------------------------------ */
+
+.stage-out {
+  animation: stageAway var(--dur-3) var(--ease-out) both;
+}
+
+@keyframes stageAway {
+  to {
+    opacity: 0;
+    transform: translateY(-16px) scale(0.94);
+  }
+}
+
+/* A folha se desdobra para a frente, a partir da dobra de cima. */
+.sheet-in {
+  transform-origin: top center;
+  animation: sheetUnfold 760ms var(--ease-out) both;
+}
+
+@keyframes sheetUnfold {
+  0% {
+    opacity: 0;
+    transform: perspective(900px) rotateX(-76deg) scaleY(0.55);
+  }
+  60% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}

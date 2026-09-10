@@ -196,9 +196,11 @@
   display: grid;
   justify-items: center;
   gap: var(--sp-3);
-  /* Reserva a altura do texto da revelação: sem isso a página inteira daria um
-     pulo no momento em que a mensagem entra. */
-  min-block-size: 168px;
+  /* Só a altura da dica, e não a do texto inteiro da revelação: reservar a
+     mensagem toda deixava um vão vazio enorme embaixo do baralho antes de
+     alguém jogar. Como a seção é a última da página, o que cresce depois
+     empurra só o rodapé. */
+  min-block-size: var(--sp-8);
   align-content: start;
 }
 
@@ -245,6 +247,6 @@
   }
 
   .trick__foot {
-    min-block-size: 150px;
+    min-block-size: var(--sp-7);
   }
 }
