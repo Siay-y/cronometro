@@ -1,0 +1,488 @@
+@use 'sass:math';
+
+:host {
+  /* Caixa e foto dividem a mesma célula: a troca acontece no lugar. */
+  display: grid;
+  grid-template-areas: 'swap';
+  inline-size: 100%;
+  margin-block-start: var(--sp-3);
+}
+
+.stage,
+.opened {
+  grid-area: swap;
+}
+
+.stage {
+  display: grid;
+  justify-items: center;
+  gap: var(--sp-4);
+  padding-block: var(--sp-4) var(--sp-2);
+}
+
+.stage__teaser {
+  max-inline-size: 30ch;
+  text-align: center;
+  font-family: var(--font-script);
+  font-style: italic;
+  font-size: clamp(1.05rem, 4vw, 1.25rem);
+  color: var(--c-trench-soft);
+}
+
+.stage__hint {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+  color: var(--c-magenta);
+}
+
+/* --- A caixa ----------------------------------------------------------------
+   Desenhada em camadas: o fundo de dentro, a foto guardada, a frente e a tampa.
+   Fechada, a frente e a tampa cobrem a foto por inteiro. Aberta, a tampa voa e
+   a foto sobe pela boca da caixa, entre o fundo e a frente.
+   ---------------------------------------------------------------------------- */
+
+.box {
+  position: relative;
+  inline-size: min(204px, 60vw);
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  /* Segurar o dedo na caixa não pode selecionar nada nem abrir menu. */
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.box:focus-visible {
+  outline: 2px solid var(--c-magenta);
+  outline-offset: 8px;
+  border-radius: 16px;
+}
+
+/* Papel de embrulho: bolinhas de luz sobre o violeta, com a luz vindo da
+   esquerda para dar volume. É o mesmo papel no corpo e na tampa. */
+$wrap-dots: radial-gradient(
+    circle at 30% 30%,
+    rgba(255, 255, 255, 0.16) 0 1.4px,
+    transparent 2.2px
+  )
+  0 0 / 13px 13px;
+
+.box__scene {
+  position: absolute;
+  inset: 8%;
+  filter: drop-shadow(0 0 18px rgba(255, 45, 149, 0.18));
+  transition: filter var(--dur-3) var(--ease-out);
+}
+
+.box__scene > * {
+  position: absolute;
+}
+
+/* Sombra de mesa: a caixa está apoiada em alguma coisa. */
+.box__ground {
+  inset: auto 6% 3%;
+  block-size: 9%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.7), transparent 70%);
+  filter: blur(4px);
+}
+
+.box__inside {
+  inset: 34% 12% 12%;
+  border-radius: 6px;
+  background: linear-gradient(180deg, #07030d, #1a0f2b);
+}
+
+/* Guardada: inteira atrás da frente e da tampa, sem um fio de papel à mostra.
+   O pé fica bem acima do pé da caixa de propósito. */
+.box__photo {
+  inset: 38% 21% 18%;
+  padding: 5% 5% 14%;
+  border-radius: 3px;
+  background: #fffdf6;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.45);
+  transition: transform 760ms var(--ease-out) 420ms;
+}
+
+.box__photo img {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+  background: #e3d6c0;
+}
+
+.box__body {
+  inset: 44% 10% 10%;
+  border-radius: 3px 3px 9px 9px;
+  background:
+    $wrap-dots,
+    linear-gradient(90deg, #7a48dd, #4c1d95 48%, #2c1150);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.1),
+    inset -6px 0 12px rgba(0, 0, 0, 0.35),
+    0 14px 22px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+}
+
+/* A tampa: um pouco mais larga que o corpo e com um friso na borda de baixo,
+   que é o que faz ela parecer encaixada por cima e não pintada. */
+.box__lid {
+  inset: 33% 5% auto;
+  block-size: 14%;
+  border-radius: 6px 6px 3px 3px;
+  background:
+    $wrap-dots,
+    linear-gradient(90deg, #8a5cf0, #5b2bb3 48%, #3a1770);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.2),
+    inset 0 -4px 0 rgba(0, 0, 0, 0.32),
+    0 8px 12px rgba(0, 0, 0, 0.4);
+  transform-origin: 80% 100%;
+}
+
+/* A fita em cruz: a vertical desce pela tampa e pelo corpo; a horizontal
+   corta o corpo no meio. Com brilho, porque é a energia do Gambit. */
+.box__ribbon {
+  position: absolute;
+  background: linear-gradient(90deg, #ff8ac7, var(--c-magenta) 45%, var(--c-magenta-deep));
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.12),
+    0 0 10px rgba(255, 45, 149, 0.5);
+}
+
+.box__ribbon--v {
+  inset-block: 0;
+  inset-inline-start: 50%;
+  inline-size: 15%;
+  translate: -50% 0;
+}
+
+.box__ribbon--h {
+  inset-inline: 0;
+  inset-block-start: 40%;
+  block-size: 22%;
+  background: linear-gradient(180deg, #ff8ac7, var(--c-magenta) 45%, var(--c-magenta-deep));
+}
+
+/* --- O laço ------------------------------------------------------------------
+   Dois laços cheios com o furo do meio escuro, duas pontas caindo sobre a
+   tampa com o corte em V, e o nó no centro. Medido em relação à tampa.
+   ---------------------------------------------------------------------------- */
+
+.box__bow {
+  inset-block-start: 0;
+  inset-inline-start: 50%;
+  inline-size: 74%;
+  block-size: 270%;
+  translate: -50% -80%;
+}
+
+.bow__loop,
+.bow__tail,
+.bow__knot {
+  position: absolute;
+}
+
+.bow__loop {
+  inset-block-start: 6%;
+  inline-size: 46%;
+  block-size: 60%;
+  border-radius: 55% 55% 50% 50% / 70% 70% 40% 40%;
+  background: linear-gradient(160deg, #ff8ac7, var(--c-magenta) 55%, var(--c-magenta-deep));
+  box-shadow:
+    inset 0 -4px 8px rgba(80, 0, 45, 0.35),
+    0 0 12px rgba(255, 45, 149, 0.45);
+}
+
+/* O furo do laço. */
+.bow__loop::after {
+  content: '';
+  position: absolute;
+  inset: 24% 28% 32%;
+  border-radius: inherit;
+  background: rgba(50, 0, 35, 0.5);
+}
+
+.bow__loop--l {
+  inset-inline-start: 5%;
+  rotate: -30deg;
+  transform-origin: 100% 100%;
+}
+
+.bow__loop--r {
+  inset-inline-end: 5%;
+  rotate: 30deg;
+  transform-origin: 0 100%;
+}
+
+.bow__tail {
+  inset-block-start: 56%;
+  inline-size: 17%;
+  block-size: 48%;
+  background: linear-gradient(180deg, var(--c-magenta), var(--c-magenta-deep));
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 76%, 0 100%);
+  transform-origin: 50% 0;
+}
+
+.bow__tail--l {
+  inset-inline-start: 33%;
+  rotate: 16deg;
+}
+
+.bow__tail--r {
+  inset-inline-end: 33%;
+  rotate: -16deg;
+}
+
+.bow__knot {
+  inset-block-start: 56%;
+  inset-inline-start: 50%;
+  inline-size: 22%;
+  block-size: 24%;
+  translate: -50% -50%;
+  border-radius: 42%;
+  background: radial-gradient(circle at 35% 30%, #ffb3dc, var(--c-magenta) 55%, var(--c-magenta-deep));
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.45),
+    0 0 12px rgba(255, 45, 149, 0.75);
+}
+
+/* --- Carga: a caixa chacoalha ----------------------------------------------
+   Vinte e quatro sacudidas em 1,2s, cada uma um pouco mais forte que a outra.
+   É a amplitude crescendo, e não a velocidade, que faz parecer que a caixa
+   está prestes a não aguentar. A duração bate com CHARGE_MS.
+   ---------------------------------------------------------------------------- */
+
+:host(.is-charging) .box__scene {
+  animation: rumble 1200ms linear both;
+  /* A energia sobe: o brilho magenta em volta cresce junto com a sacudida. */
+  filter: drop-shadow(0 0 28px rgba(255, 45, 149, 0.5)) brightness(1.22) saturate(1.2);
+  transition-duration: 1200ms;
+  transition-timing-function: linear;
+}
+
+@keyframes rumble {
+  @for $i from 0 through 24 {
+    $p: $i * math.div(100, 24);
+    $amp: $i * 0.26px;
+    $rot: $i * 0.13deg;
+    /* Alterna o lado a cada sacudida: par para a direita, ímpar para a esquerda. */
+    $sign: 1 - 2 * ($i % 2);
+
+    #{$p}% {
+      transform: translate($amp * $sign, $amp * -0.45 * $sign) rotate($rot * $sign);
+    }
+  }
+}
+
+.box__ring {
+  position: absolute;
+  inset: 0;
+  fill: none;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.ring__track {
+  stroke: rgba(255, 45, 149, 0.2);
+  stroke-width: 1.4;
+}
+
+.ring__fill {
+  stroke: var(--c-magenta);
+  stroke-width: 2.6;
+  stroke-linejoin: round;
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  filter: drop-shadow(0 0 3px var(--c-magenta));
+  /* Solta antes da hora: a energia escorre de volta, e mais rápido. */
+  transition: stroke-dashoffset 380ms var(--ease-out);
+}
+
+:host(.is-charging) .ring__fill {
+  stroke-dashoffset: 0;
+  transition-duration: 1200ms;
+  transition-timing-function: linear;
+}
+
+/* --- Abrindo: a tampa voa e a foto sobe ------------------------------------ */
+
+.box__burst {
+  position: absolute;
+  inset: -30%;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    #fff 0%,
+    rgba(255, 45, 149, 0.6) 30%,
+    rgba(139, 92, 246, 0.25) 52%,
+    transparent 70%
+  );
+  opacity: 0;
+  pointer-events: none;
+}
+
+:host(.is-opening) .box__burst {
+  animation: boxBurst 640ms var(--ease-expo) both;
+}
+
+:host(.is-opening) .box__lid {
+  animation: lidOff 680ms var(--ease-out) both;
+}
+
+:host(.is-opening) .box__photo {
+  /* Sobe pela boca da caixa e desencosta um pouco, como puxada com a mão. */
+  transform: translateY(-92%) rotate(-4deg);
+}
+
+:host(.is-opening) .box__ring {
+  opacity: 0;
+  transition: opacity var(--dur-2) var(--ease-out);
+}
+
+@keyframes boxBurst {
+  0% {
+    opacity: 0.9;
+    transform: scale(0.3);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.8);
+  }
+}
+
+@keyframes lidOff {
+  0% {
+    transform: none;
+    opacity: 1;
+  }
+  35% {
+    transform: translate(10%, -60%) rotate(-10deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(48%, -230%) rotate(34deg);
+    opacity: 0;
+  }
+}
+
+/* --- Aberta: o porta-retratos ---------------------------------------------- */
+
+.stage-out {
+  animation: stageAway 480ms var(--ease-out) both;
+}
+
+@keyframes stageAway {
+  to {
+    opacity: 0;
+    transform: translateY(24px) scale(0.9);
+  }
+}
+
+.opened {
+  display: grid;
+  justify-items: center;
+  gap: var(--sp-4);
+  inline-size: 100%;
+}
+
+.opened-in {
+  animation: frameSettle 760ms var(--ease-spring) both;
+}
+
+@keyframes frameSettle {
+  0% {
+    opacity: 0;
+    transform: translateY(46px) scale(0.55) rotate(-4deg);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Moldura de retrato em papel, a mesma família das fotos da carta. É um botão:
+   tocar nela abre o visor. */
+.frame {
+  display: grid;
+  gap: var(--sp-2);
+  inline-size: min(300px, 82%);
+  padding: 10px 10px 12px;
+  border: 0;
+  font: inherit;
+  cursor: pointer;
+  background: #fffdf6;
+  border-radius: 4px;
+  rotate: -1.5deg;
+  box-shadow:
+    var(--shadow-float),
+    0 0 0 1px rgba(92, 42, 70, 0.14),
+    0 0 40px rgba(255, 45, 149, 0.18);
+  transition:
+    rotate var(--dur-3) var(--ease-spring),
+    scale var(--dur-3) var(--ease-spring),
+    box-shadow var(--dur-3) var(--ease-out);
+}
+
+.frame:hover,
+.frame:focus-visible {
+  rotate: 0deg;
+  scale: 1.03;
+  box-shadow:
+    var(--shadow-float),
+    0 0 0 1px rgba(92, 42, 70, 0.14),
+    0 0 56px rgba(255, 45, 149, 0.34);
+}
+
+.frame:focus-visible {
+  outline: 2px solid var(--c-magenta);
+  outline-offset: 6px;
+}
+
+.frame__peek {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--sp-1);
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--c-magenta-deep);
+}
+
+.frame img {
+  display: block;
+  inline-size: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 2px;
+  background: #e3d6c0;
+}
+
+.frame__caption {
+  text-align: center;
+  font-family: var(--font-script);
+  font-style: italic;
+  font-size: 1.05rem;
+  color: #6b4a3a;
+}
+
+.opened__text {
+  display: grid;
+  gap: var(--sp-3);
+  max-inline-size: 44ch;
+  text-align: center;
+  color: var(--c-text-muted);
+  font-size: var(--fs-lead);
+  line-height: 1.7;
+}
+
+.opened__text p {
+  animation: riseIn var(--dur-4) var(--ease-out) both;
+}

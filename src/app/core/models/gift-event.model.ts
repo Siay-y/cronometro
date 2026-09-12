@@ -26,6 +26,26 @@ export interface ReplyInvite {
 }
 
 /**
+ * Uma caixa de presente embrulhada dentro de um card.
+ *
+ * Quando existe, a revelação ganha uma caixa fechada: ela segura até a caixa
+ * chacoalhar e não aguentar mais, a tampa voa e uma foto sai de dentro.
+ */
+export interface SealedGift {
+  /** Frase acima da caixa enquanto ela está fechada. */
+  readonly teaser: string;
+  /** A foto que sai de dentro da caixa. */
+  readonly photo: LetterPhoto;
+  /** O que fica escrito embaixo da foto depois de aberta. Linha em branco vira parágrafo. */
+  readonly reveal: string;
+  /**
+   * O que está escrito à mão atrás da foto. Quando existe, ela pode virar o
+   * retrato no visor e ler o verso. Linha em branco vira parágrafo.
+   */
+  readonly back?: string;
+}
+
+/**
  * Uma carta lacrada guardada dentro de um presente.
  *
  * Quando ela existe, a revelação ganha um envelope fechado e um botão: o lacre
@@ -70,6 +90,8 @@ export interface GiftEvent {
   readonly icon: string;
   /** Carta lacrada opcional: rende um envelope para abrir dentro da revelação. */
   readonly letter?: SealedLetter;
+  /** Caixa embrulhada opcional: rende um presente para abrir dentro da revelação. */
+  readonly gift?: SealedGift;
   readonly accent: GiftAccent;
   /** Instante em que o presente destrava, no formato `AAAA-MM-DDTHH:mm`. */
   readonly opensAt: string;

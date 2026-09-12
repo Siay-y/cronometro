@@ -105,14 +105,29 @@ export const GIFT_EVENTS: readonly GiftEvent[] = [
   },
   {
     id: 'gift-06',
-    title: 'Jantar à luz de vela',
-    teaser: 'Reserva feita. Só falta você dizer sim.',
+    title: 'Um segredinho embrulhado',
+    teaser: 'Tem uma caixa dentro desta carta. E um segredo dentro da caixa.',
     message:
-      'Separa a noite. Só isso.\n\nO resto (lugar, hora, o que a gente vai comer) já está resolvido. Você só precisa aparecer e ser exatamente do jeito que você é.\n\nJá te aviso: eu vou olhar para você mais do que para o prato.',
-    icon: '🍷',
+      'Hoje o presente vem embrulhado, Mon Cher.\n\nTem um segredinho guardado aí dentro...\n\nDepois me conta se você gostou :>',
+    icon: '🎀',
     accent: 'gold',
-    opensAt: '2026-09-12T20:00',
+    opensAt: '2026-09-12T14:23',
     durationMinutes: 2880,
+    // ↓↓↓ A CAIXA ↓↓↓  `reveal` é o que fica escrito embaixo da foto.
+    gift: {
+      teaser: 'Tem um segredinho guardado aqui dentro.',
+      photo: {
+        src: '/fotos/porta-retratos.jpg',
+        alt: 'Um porta-retratos com um desenho nosso',
+        caption: 'para ficar do lado da sua cama',
+      },
+      reveal:
+        'Um porta-retratos, Mon Cher.\n\nEu queria que a gente ficasse num lugar que você olha todo dia sem querer: na cabeceira, na mesa, onde você acorda. Assim, mesmo nos dias em que eu não estiver por perto, tem um pedacinho nosso de olho em você.\n\nO de verdade chega nas suas mãos hoje. Esse aqui é só para você saber o que vem :>\n\nToca na foto para ver de perto. E vira ela: tem uma coisinha escrita atrás.',
+      // O que está escrito à mão atrás da foto. Ela vê quando vira o retrato.
+      back:
+        'Mon Amour,\n\nsempre que olhar para cá, lembra: eu estou do seu ladinho, mesmo quando não estou por perto.\n\nTe amo mucho, mucho, mucho.\n\nGambit ♠',
+    },
+    // ↑↑↑ A CAIXA ↑↑↑
   },
   {
     id: 'gift-07',

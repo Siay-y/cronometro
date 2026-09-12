@@ -12,6 +12,7 @@ import {
   GiftAccent,
   GiftEvent,
   GiftEventView,
+  SealedGift,
   SealedLetter,
 } from '../../../core/models/gift-event.model';
 import { ClockService } from '../../../core/services/clock.service';
@@ -51,6 +52,8 @@ interface GiftDraft {
    * em silêncio o envelope escrito no arquivo de dados.
    */
   letter?: SealedLetter;
+  /** Idem: a caixa de presente viaja junto para sobreviver ao salvamento. */
+  gift?: SealedGift;
 }
 
 function emptyDraft(): GiftDraft {
@@ -117,9 +120,20 @@ export class AdminPanel {
   }
 
   protected edit(view: GiftEventView): void {
-    const { id, title, teaser, message, icon, accent, opensAt, durationMinutes, letter } =
+    const { id, title, teaser, message, icon, accent, opensAt, durationMinutes, letter, gift } =
       view.event;
-    this.draft.set({ id, title, teaser, message, icon, accent, opensAt, durationMinutes, letter });
+    this.draft.set({
+      id,
+      title,
+      teaser,
+      message,
+      icon,
+      accent,
+      opensAt,
+      durationMinutes,
+      letter,
+      gift,
+    });
   }
 
   protected resetDraft(): void {
@@ -140,6 +154,7 @@ export class AdminPanel {
       opensAt: draft.opensAt,
       durationMinutes: Math.max(1, Math.round(draft.durationMinutes)),
       ...(draft.letter ? { letter: draft.letter } : {}),
+      ...(draft.gift ? { gift: draft.gift } : {}),
     };
 
     this.store.upsert(event);

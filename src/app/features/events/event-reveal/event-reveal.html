@@ -26,6 +26,10 @@
     <app-letter-envelope [letter]="letter" [letterId]="event().id" />
   }
 
+  @if (event().gift; as gift) {
+    <app-gift-box [gift]="gift" />
+  }
+
   <footer class="panel__foot" [class.panel__foot--solo]="!!event().letter">
     <!-- O botão bate como coração, e cada toque é uma batida mais forte que
          solta a onda e os corações. O naipe é o mesmo do baralho. -->

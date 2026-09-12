@@ -1,0 +1,72 @@
+@if (!opened()) {
+  <div class="stage" animate.leave="stage-out">
+    <p class="stage__teaser">{{ gift().teaser }}</p>
+
+    <button
+      type="button"
+      class="box"
+      aria-label="Segure para abrir o presente"
+      (click)="select()"
+      (pointerdown)="pressStart()"
+      (pointerup)="pressEnd()"
+      (pointerleave)="pressEnd()"
+      (pointercancel)="pressEnd()"
+    >
+      <span class="box__burst" aria-hidden="true"></span>
+
+      <!-- A ordem aqui é a ordem das camadas: o fundo de dentro, a foto que
+           está guardada, a frente da caixa (que esconde a foto) e a tampa. -->
+      <span class="box__scene" aria-hidden="true">
+        <span class="box__ground"></span>
+        <span class="box__inside"></span>
+        <span class="box__photo">
+          <img [src]="gift().photo.src" alt="" />
+        </span>
+        <span class="box__body">
+          <span class="box__ribbon box__ribbon--v"></span>
+          <span class="box__ribbon box__ribbon--h"></span>
+        </span>
+        <span class="box__lid">
+          <span class="box__ribbon box__ribbon--v"></span>
+          <!-- O laço mora na tampa para voar junto com ela. -->
+          <span class="box__bow">
+            <span class="bow__tail bow__tail--l"></span>
+            <span class="bow__tail bow__tail--r"></span>
+            <span class="bow__loop bow__loop--l"></span>
+            <span class="bow__loop bow__loop--r"></span>
+            <span class="bow__knot"></span>
+          </span>
+        </span>
+      </span>
+
+      <!-- Anel de carga em volta da caixa: o preenchimento é uma transição de
+           CSS, não um laço de quadro a quadro. -->
+      <svg class="box__ring" viewBox="0 0 100 100" aria-hidden="true">
+        <rect class="ring__track" x="3" y="3" width="94" height="94" rx="16" pathLength="100" />
+        <rect class="ring__fill" x="3" y="3" width="94" height="94" rx="16" pathLength="100" />
+      </svg>
+    </button>
+
+    <p class="stage__hint"><app-icon name="spark" /> segure para abrir</p>
+  </div>
+} @else {
+  <figure class="opened" animate.enter="opened-in">
+    <!-- A foto se acomoda num porta-retratos de papel. Tocar nela abre o visor. -->
+    <button type="button" class="frame" (click)="view()" aria-label="Ver a foto de perto">
+      <img [src]="gift().photo.src" [alt]="gift().photo.alt" />
+      @if (gift().photo.caption; as caption) {
+        <span class="frame__caption">{{ caption }}</span>
+      }
+      <span class="frame__peek" aria-hidden="true"><app-icon name="spark" /> toque para ver de perto</span>
+    </button>
+
+    <figcaption class="opened__text">
+      @for (paragraph of paragraphs(); track $index) {
+        <p [style.animation-delay.ms]="inkDelay + $index * inkStep">{{ paragraph }}</p>
+      }
+    </figcaption>
+
+    <!-- A foto de perto. Fechado até ela tocar na moldura. -->
+    <app-photo-viewer [photo]="gift().photo" [back]="gift().back" />
+  </figure>
+}

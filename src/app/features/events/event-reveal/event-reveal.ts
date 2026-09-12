@@ -15,6 +15,7 @@ import { CELEBRATION_CONFIG } from '../../../core/config/celebration.config';
 import { GiftEventView } from '../../../core/models/gift-event.model';
 import { SchedulePipe } from '../../../shared/pipes/schedule.pipe';
 import { PlayingCard } from '../../../shared/ui/playing-card/playing-card';
+import { GiftBox } from '../gift-box/gift-box';
 import { LetterEnvelope } from '../letter-envelope/letter-envelope';
 
 /** Um coração solto pelo botão "Merci". */
@@ -44,7 +45,7 @@ const HEART_VARIANTS = 5;
  */
 @Component({
   selector: 'app-event-reveal',
-  imports: [SchedulePipe, PlayingCard, LetterEnvelope],
+  imports: [SchedulePipe, PlayingCard, LetterEnvelope, GiftBox],
   templateUrl: './event-reveal.html',
   styleUrl: './event-reveal.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

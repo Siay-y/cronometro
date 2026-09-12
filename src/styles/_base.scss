@@ -25,6 +25,12 @@ html {
   overflow-x: clip;
 }
 
+/* Com um presente aberto, a página de trás para de rolar: some a barra
+   lateral que aparecia ao lado do modal e o dedo não arrasta o fundo. */
+html:has(app-event-reveal) {
+  overflow-y: hidden;
+}
+
 body {
   min-height: 100svh;
   background: var(--c-void);

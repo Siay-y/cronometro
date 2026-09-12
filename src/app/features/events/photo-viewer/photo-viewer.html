@@ -1,0 +1,62 @@
+<!-- Ocupa a tela inteira para que um clique fora do retrato chegue no próprio
+     diálogo e feche. O conteúdo só existe enquanto está aberto. -->
+<dialog
+  #dialog
+  class="viewer"
+  aria-label="A foto de perto"
+  (close)="onClosed()"
+  (click)="onScrimClick($event)"
+>
+  @if (viewing()) {
+    <button type="button" class="viewer__close" (click)="close()">
+      <span class="sr-only">Fechar</span>
+      <span aria-hidden="true">✕</span>
+    </button>
+
+    <!-- O retrato inclina para onde o dedo está e a luz bate ali. Tocar vira. -->
+    <div
+      class="card"
+      [class.is-live]="tilt().live"
+      [class.is-flipped]="flipped()"
+      [style.--rx]="tilt().x + 'deg'"
+      [style.--ry]="tilt().y + 'deg'"
+      [style.--gx]="tilt().gx + '%'"
+      [style.--gy]="tilt().gy + '%'"
+      (pointermove)="follow($event)"
+      (pointerleave)="settle()"
+      (pointercancel)="settle()"
+      (click)="flip()"
+    >
+      <div class="card__flip">
+        <div class="face face--front">
+          <img [src]="photo().src" [alt]="photo().alt" draggable="false" />
+          @if (photo().caption; as caption) {
+            <span class="face__caption">{{ caption }}</span>
+          }
+          <span class="face__glare" aria-hidden="true"></span>
+        </div>
+
+        @if (hasBack()) {
+          <div class="face face--back" [attr.aria-hidden]="!flipped()">
+            <div class="back__ink">
+              @for (paragraph of backParagraphs(); track $index) {
+                <p>{{ paragraph }}</p>
+              }
+            </div>
+            <span class="face__glare" aria-hidden="true"></span>
+          </div>
+        }
+      </div>
+    </div>
+
+    @if (hasBack()) {
+      <button type="button" class="viewer__flip" (click)="flip()">
+        <span class="flip__mark" aria-hidden="true">♠</span>
+        {{ flipped() ? 'Ver a foto' : 'Virar a foto' }}
+      </button>
+      <p class="viewer__hint">toque no retrato para virar · arraste o dedo para inclinar</p>
+    } @else {
+      <p class="viewer__hint">arraste o dedo para inclinar</p>
+    }
+  }
+</dialog>

@@ -1,0 +1,276 @@
+:host {
+  display: contents;
+}
+
+/* --- O diálogo ---------------------------------------------------------------
+   Tela inteira e transparente: o escuro e o desfoque ficam no `::backdrop`, e
+   o próprio diálogo é o "fora do retrato" que fecha ao clique.
+   ---------------------------------------------------------------------------- */
+
+.viewer {
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  max-inline-size: none;
+  max-block-size: none;
+  margin: 0;
+  padding: var(--sp-4);
+  padding-block-end: max(var(--sp-4), env(safe-area-inset-bottom));
+  border: 0;
+  background: transparent;
+  color: var(--c-text);
+  place-content: center;
+  justify-items: center;
+  gap: var(--sp-4);
+  overflow: hidden;
+}
+
+.viewer[open] {
+  display: grid;
+}
+
+.viewer::backdrop {
+  background: rgba(4, 2, 9, 0.88);
+  backdrop-filter: blur(16px);
+}
+
+.viewer__close {
+  position: absolute;
+  inset-block-start: max(var(--sp-4), env(safe-area-inset-top));
+  inset-inline-end: var(--sp-4);
+  display: grid;
+  place-items: center;
+  inline-size: 44px;
+  block-size: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--c-hairline-strong);
+  background: rgba(19, 10, 32, 0.8);
+  color: var(--c-text-muted);
+  font-size: 1.05rem;
+  transition:
+    color var(--dur-2) var(--ease-out),
+    transform var(--dur-2) var(--ease-spring);
+}
+
+.viewer__close:hover,
+.viewer__close:focus-visible {
+  color: var(--c-magenta);
+  transform: rotate(90deg);
+}
+
+/* --- O retrato ---------------------------------------------------------------
+   `.card` inclina seguindo o dedo (rápido); `.card__flip` gira para o verso
+   (lento). São duas camadas para as duas transições não brigarem.
+   ---------------------------------------------------------------------------- */
+
+.card {
+  --rx: 0deg;
+  --ry: 0deg;
+  --gx: 50%;
+  --gy: 50%;
+
+  inline-size: min(88vw, 420px);
+  cursor: pointer;
+  /* O dedo arrasta para inclinar, então a página não pode rolar por baixo. */
+  touch-action: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  transform: perspective(1100px) rotateX(var(--rx)) rotateY(var(--ry));
+  transform-style: preserve-3d;
+  transition: transform 140ms linear;
+  animation: cardIn 640ms var(--ease-spring) both;
+}
+
+/* Sem dedo em cima, volta ao repouso com calma. */
+.card:not(.is-live) {
+  transition-duration: 620ms;
+  transition-timing-function: var(--ease-out);
+}
+
+@keyframes cardIn {
+  from {
+    opacity: 0;
+    scale: 0.7;
+  }
+}
+
+.card__flip {
+  display: grid;
+  transform-style: preserve-3d;
+  transition: transform 760ms var(--ease-in-out);
+}
+
+.card.is-flipped .card__flip {
+  transform: rotateY(180deg);
+}
+
+/* Frente e verso na mesma célula: o verso tem sempre o tamanho da frente. */
+.face {
+  position: relative;
+  grid-area: 1 / 1;
+  display: grid;
+  gap: var(--sp-3);
+  padding: 14px 14px 18px;
+  border-radius: 6px;
+  background: #fffdf6;
+  backface-visibility: hidden;
+  box-shadow:
+    var(--shadow-float),
+    0 0 0 1px rgba(92, 42, 70, 0.14),
+    0 0 60px rgba(255, 45, 149, 0.22);
+  overflow: hidden;
+}
+
+.face--back {
+  transform: rotateY(180deg);
+}
+
+.face--front img {
+  display: block;
+  inline-size: 100%;
+  max-block-size: 60svh;
+  object-fit: contain;
+  border-radius: 3px;
+  background: #e3d6c0;
+}
+
+.face__caption {
+  text-align: center;
+  font-family: var(--font-script);
+  font-style: italic;
+  font-size: 1.15rem;
+  color: #6b4a3a;
+}
+
+/* A luz batendo no retrato: um brilho branco onde o dedo está e uma faixa de
+   energia (magenta, violeta, dourado) que corre junto. Só aparece com o dedo. */
+.face__glare {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  mix-blend-mode: screen;
+  background:
+    radial-gradient(circle at var(--gx) var(--gy), rgba(255, 255, 255, 0.5), transparent 40%),
+    linear-gradient(
+      115deg,
+      transparent 32%,
+      rgba(255, 45, 149, 0.4) 44%,
+      rgba(139, 92, 246, 0.42) 51%,
+      rgba(246, 196, 83, 0.34) 58%,
+      transparent 70%
+    );
+  background-size:
+    100% 100%,
+    300% 300%;
+  background-position:
+    0 0,
+    var(--gx) var(--gy);
+  transition: opacity var(--dur-3) var(--ease-out);
+}
+
+.card.is-live .face__glare {
+  opacity: 1;
+}
+
+/* --- O verso -----------------------------------------------------------------
+   Papel de foto por trás: um creme mais fosco, com o carimbo do fabricante
+   apagado no canto e o texto escrito à mão por cima.
+   ---------------------------------------------------------------------------- */
+
+.face--back {
+  place-items: center;
+  background:
+    repeating-linear-gradient(
+      0deg,
+      transparent 0 30px,
+      rgba(107, 74, 58, 0.09) 30px 31px
+    ),
+    linear-gradient(160deg, #f4ecdc, #e9dcc3);
+}
+
+.face--back::before {
+  content: '♠ Gambit ♠';
+  position: absolute;
+  inset-block-start: 10px;
+  inset-inline-end: 12px;
+  rotate: -8deg;
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  letter-spacing: 0.22em;
+  color: rgba(107, 74, 58, 0.28);
+}
+
+.back__ink {
+  display: grid;
+  gap: var(--sp-3);
+  padding: var(--sp-5) var(--sp-3);
+  max-inline-size: 30ch;
+  text-align: center;
+  font-family: var(--font-script);
+  font-style: italic;
+  font-size: clamp(1.15rem, 4.6vw, 1.45rem);
+  line-height: 1.5;
+  color: #3f2a2a;
+  text-wrap: pretty;
+}
+
+.back__ink p:last-child {
+  margin-block-start: var(--sp-2);
+  font-style: normal;
+  font-weight: 700;
+  color: var(--c-magenta-deep);
+}
+
+/* --- Rodapé: virar e a dica -------------------------------------------------- */
+
+.viewer__flip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-3) var(--sp-5);
+  border-radius: var(--r-pill);
+  border: 1px solid var(--c-hairline-strong);
+  background: rgba(19, 10, 32, 0.8);
+  color: var(--c-text);
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  letter-spacing: 0.08em;
+  box-shadow: var(--glow-sm);
+  transition:
+    transform var(--dur-2) var(--ease-spring),
+    box-shadow var(--dur-2) var(--ease-out);
+}
+
+.viewer__flip:hover,
+.viewer__flip:focus-visible {
+  transform: translateY(-2px);
+  box-shadow: var(--glow-md);
+}
+
+.flip__mark {
+  color: var(--c-magenta);
+  transition: transform 760ms var(--ease-in-out);
+}
+
+.viewer:has(.is-flipped) .flip__mark {
+  transform: rotateY(180deg);
+}
+
+.viewer__hint {
+  font-size: 0.74rem;
+  letter-spacing: 0.04em;
+  text-align: center;
+  color: var(--c-text-faint);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    animation: none;
+    transform: none;
+  }
+
+  .card__flip {
+    transition: none;
+  }
+}
