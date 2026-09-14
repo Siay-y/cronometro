@@ -1,0 +1,117 @@
+<section class="table" id="mesa">
+  <div class="table__head">
+    <p class="eyebrow">A mesa dele</p>
+    <h2 class="table__title">Vinte e um contra o Gambit</h2>
+    <p class="table__lead">
+      Uma mão de cada vez, {{ config.honorific }}. Chegue perto de vinte e um sem passar. Ele para
+      em dezesseis, e diz que é regra da casa.
+    </p>
+  </div>
+
+  <div
+    class="felt"
+    [class.felt--her]="outcome() === 'her'"
+    [class.felt--gambit]="outcome() === 'gambit'"
+  >
+    <p class="tally">
+      <span
+        >Você <strong>{{ tally().her }}</strong></span
+      >
+      <span class="tally__x" aria-hidden="true">×</span>
+      <span
+        >Gambit <strong>{{ tally().gambit }}</strong></span
+      >
+    </p>
+
+    <!-- A mão dele: a segunda carta fica virada até ela parar. -->
+    <div class="seat seat--gambit">
+      <p class="seat__name">
+        Gambit
+        @if (gambit().length) {
+          <span class="seat__value">{{ gambitValue() }}{{ holeRevealed() ? '' : ' + ?' }}</span>
+        }
+      </p>
+      <div class="hand">
+        @for (card of gambit(); track $index; let i = $index) {
+          @if (i === 1) {
+            <span class="hole" [class.is-revealed]="holeRevealed()" animate.enter="anim-deal">
+              <app-playing-card
+                class="hand__card hole__back"
+                faceDown
+                holographic="false"
+                [charge]="0.3"
+              />
+              <app-playing-card
+                class="hand__card hole__face"
+                [rank]="card.rank"
+                [suit]="card.suit"
+                holographic="false"
+                [charge]="0.5"
+              />
+            </span>
+          } @else {
+            <app-playing-card
+              class="hand__card"
+              [rank]="card.rank"
+              [suit]="card.suit"
+              holographic="false"
+              [charge]="0.5"
+              animate.enter="anim-deal"
+            />
+          }
+        }
+      </div>
+    </div>
+
+    <!-- O que ele diz a cada momento da mão. O parágrafo nasce de novo a cada
+         fala (track pelo texto), então a entrada dele anima toda vez. -->
+    <div class="voice-slot" aria-live="polite">
+      @for (text of [line()]; track text) {
+        <p class="voice cajun">{{ text }}</p>
+      }
+    </div>
+
+    <div class="seat seat--her">
+      <div class="hand">
+        @for (card of her(); track $index) {
+          <app-playing-card
+            class="hand__card"
+            [rank]="card.rank"
+            [suit]="card.suit"
+            [charge]="0.9"
+            animate.enter="anim-deal"
+          />
+        }
+      </div>
+      <p class="seat__name">
+        Você
+        @if (her().length) {
+          <span class="seat__value" [class.is-bust]="herValue() > 21">{{ herValue() }}</span>
+        }
+      </p>
+    </div>
+
+    <!-- As fichas. Durante a mão as duas ficam sempre na mesa: apagadas
+         enquanto as cartas caem e enquanto ele joga, acesas na vez dela. -->
+    <div class="actions">
+      @if (idle() || over()) {
+        <button type="button" class="chip chip--deal" (click)="deal()">
+          <span class="chip__label">
+            <app-icon name="cards" />
+            {{ over() ? 'Outra mão' : 'Dar as cartas' }}
+          </span>
+          <span class="chip__hint">{{ over() ? 'baralho novo, sorte nova' : 'uma mão só' }}</span>
+        </button>
+      } @else {
+        <button type="button" class="chip chip--hit" (click)="hit()" [disabled]="!herTurn()">
+          <span class="chip__label"><app-icon name="card-plus" /> Mais uma</span>
+          <span class="chip__hint">{{ dealing() ? 'as cartas vêm' : hitHint() }}</span>
+        </button>
+        <button type="button" class="chip chip--stand" (click)="stand()" [disabled]="!herTurn()">
+          <span class="chip__label"><app-icon name="palm" /> Parar</span>
+          <span class="chip__hint">{{ dealing() ? 'calma, chère' : 'fico com ' + herValue() }}</span>
+        </button>
+      }
+    </div>
+  </div>
+</section>

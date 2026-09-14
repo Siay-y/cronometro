@@ -13,6 +13,7 @@ import { CountdownService } from '../../core/services/countdown.service';
 import { KineticBackdrop } from '../../shared/ui/kinetic-backdrop/kinetic-backdrop';
 import { PlayingCard } from '../../shared/ui/playing-card/playing-card';
 import { AdminPanel } from '../admin/admin-panel/admin-panel';
+import { BlackjackTable } from '../blackjack/blackjack-table/blackjack-table';
 import { BirthdayReveal } from '../celebration/birthday-reveal/birthday-reveal';
 import { CountdownHero } from '../countdown/countdown-hero/countdown-hero';
 import { FloatingHeader } from './floating-header/floating-header';
@@ -36,6 +37,7 @@ const SECRET_WINDOW_MS = 2500;
     BirthdayReveal,
     EventsSection,
     CardTrick,
+    BlackjackTable,
     FloatingHeader,
     AdminPanel,
   ],

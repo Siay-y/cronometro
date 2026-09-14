@@ -1,0 +1,283 @@
+:host {
+  display: block;
+}
+
+.table {
+  display: grid;
+  justify-items: center;
+  gap: var(--sp-5);
+  padding-block: var(--sp-7) var(--sp-6);
+  text-align: center;
+}
+
+.table__head {
+  display: grid;
+  gap: var(--sp-2);
+  max-inline-size: 46ch;
+}
+
+.table__title {
+  font-family: var(--font-display);
+  font-size: var(--fs-title);
+  letter-spacing: 0.05em;
+  color: var(--c-text);
+}
+
+.table__lead {
+  color: var(--c-text-muted);
+  font-size: var(--fs-body);
+  line-height: 1.6;
+}
+
+/* --- O feltro ----------------------------------------------------------------
+   Quase nada: um véu translúcido sobre o fundo da página, com um fio de luz
+   muito fino na borda. O fundo da casa continua aparecendo por trás. Quando a
+   mão termina, o fio muda de cor, e só ele.
+   ---------------------------------------------------------------------------- */
+
+.felt {
+  --hand-card: clamp(54px, 15vw, 76px);
+  --felt-line: var(--c-hairline);
+
+  position: relative;
+  display: grid;
+  gap: var(--sp-4);
+  inline-size: min(100%, 520px);
+  padding: var(--sp-5) var(--sp-4) var(--sp-5);
+  border-radius: var(--r-xl);
+  border: 1px solid var(--felt-line);
+  background: radial-gradient(120% 90% at 50% 0%, rgba(255, 255, 255, 0.045), transparent 70%);
+  backdrop-filter: blur(6px);
+  transition: border-color var(--dur-4) var(--ease-out);
+}
+
+.felt--her {
+  --felt-line: rgba(246, 196, 83, 0.4);
+}
+
+.felt--gambit {
+  --felt-line: rgba(139, 92, 246, 0.4);
+}
+
+.tally {
+  display: flex;
+  justify-content: center;
+  gap: var(--sp-3);
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--c-text-faint);
+}
+
+.tally strong {
+  color: var(--c-magenta-soft);
+}
+
+.tally__x {
+  color: var(--c-hairline-strong);
+}
+
+/* --- Os assentos ---------------------------------------------------------- */
+
+.seat {
+  display: grid;
+  gap: var(--sp-2);
+  justify-items: center;
+}
+
+.seat__name {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--c-text-faint);
+}
+
+.seat__value {
+  min-inline-size: 2.2em;
+  padding: 1px 8px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--c-hairline-strong);
+  color: var(--c-text);
+  letter-spacing: 0.08em;
+}
+
+.seat__value.is-bust {
+  border-color: var(--c-ember);
+  color: var(--c-ember);
+}
+
+.hand {
+  display: flex;
+  justify-content: center;
+  /* Sem carta ainda, o lugar dela já fica reservado: a mesa não pula. */
+  min-block-size: calc(var(--hand-card) * 1.4);
+  /* Dá profundidade à virada da carta escondida. */
+  perspective: 900px;
+}
+
+.hand__card {
+  --card-w: var(--hand-card);
+}
+
+/* As cartas se sobrepõem um pouco, como numa mão de verdade. */
+.hand > * + * {
+  margin-inline-start: calc(var(--hand-card) * -0.28);
+}
+
+/* --- A carta escondida ---------------------------------------------------
+   Duas cartas na mesma célula, costas com costas. O invólucro gira meia volta
+   (`rotate: y`, independente do `transform` da animação de entrada) e, no
+   meio do giro, a de trás dá lugar à da frente. A troca é por `visibility`
+   com atraso, e não por `backface-visibility`: a carta tem perspectiva própria
+   lá dentro, e isso deixava o verso da face à mostra, espelhado.
+   ---------------------------------------------------------------------------- */
+
+.hole {
+  display: grid;
+  transition: rotate 640ms var(--ease-in-out);
+}
+
+.hole > * {
+  grid-area: 1 / 1;
+  transition: visibility 0s 320ms;
+}
+
+/* Pré-girada: quando o invólucro completa a meia volta, ela fica de frente. */
+.hole__face {
+  rotate: y 180deg;
+  visibility: hidden;
+}
+
+.hole.is-revealed {
+  rotate: y 180deg;
+}
+
+.hole.is-revealed .hole__back {
+  visibility: hidden;
+}
+
+.hole.is-revealed .hole__face {
+  visibility: visible;
+}
+
+/* --- A fala dele ------------------------------------------------------------ */
+
+.voice-slot {
+  display: grid;
+  min-block-size: 3.4em;
+  align-content: center;
+}
+
+.voice {
+  padding-inline: var(--sp-3);
+  font-size: clamp(1.05rem, 4vw, 1.3rem);
+  line-height: 1.35;
+  text-wrap: balance;
+  animation: riseIn var(--dur-3) var(--ease-out) both;
+}
+
+/* --- As fichas --------------------------------------------------------------
+   Discretas: um fio de luz em volta, o fundo quase transparente, o ícone e o
+   rótulo na cor do texto. A cor de cada aposta (magenta em "Mais uma",
+   dourado em "Parar") aparece só no fio, e sobe um pouco ao toque. Cada uma
+   diz em letra miúda o que vai acontecer se ela apertar. Enquanto ele joga,
+   as duas ficam na mesa, apagadas: a mesa não muda de forma no meio da mão.
+   ---------------------------------------------------------------------------- */
+
+.actions {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: var(--sp-3);
+  inline-size: min(100%, 360px);
+  margin-inline: auto;
+}
+
+.chip {
+  --ink: var(--c-magenta-soft);
+  --ring: rgba(255, 45, 149, 0.3);
+  --ring-hot: rgba(255, 45, 149, 0.6);
+
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 3px;
+  min-block-size: 62px;
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: var(--r-lg);
+  border: 1px solid var(--ring);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--c-text);
+  transition:
+    transform var(--dur-2) var(--ease-spring),
+    border-color var(--dur-2) var(--ease-out),
+    background-color var(--dur-2) var(--ease-out),
+    box-shadow var(--dur-2) var(--ease-out),
+    opacity var(--dur-3) var(--ease-out);
+}
+
+.chip__label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+.chip__label app-icon {
+  inline-size: 1.25em;
+  block-size: 1.25em;
+  color: var(--ink);
+}
+
+.chip__hint {
+  font-family: var(--font-script);
+  font-style: italic;
+  font-size: 0.86rem;
+  line-height: 1.2;
+  color: var(--c-text-faint);
+}
+
+.chip--stand {
+  --ink: var(--c-gold);
+  --ring: rgba(246, 196, 83, 0.32);
+  --ring-hot: rgba(246, 196, 83, 0.65);
+}
+
+/* A de abrir a mão fica sozinha, no centro, do mesmo tamanho das outras. */
+.chip--deal {
+  grid-column: 1 / -1;
+  inline-size: min(100%, 240px);
+  margin-inline: auto;
+}
+
+.chip:hover:not(:disabled) {
+  transform: translateY(-2px);
+  border-color: var(--ring-hot);
+  background-color: rgba(255, 255, 255, 0.06);
+  box-shadow: 0 0 18px color-mix(in srgb, var(--ring-hot) 45%, transparent);
+}
+
+.chip:active:not(:disabled) {
+  transform: translateY(0) scale(0.97);
+  box-shadow: none;
+}
+
+.chip:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
+}
+
+/* Não é a vez dela: a ficha esfria, mas não sai da mesa. */
+.chip:disabled {
+  opacity: 0.35;
+  cursor: default;
+}

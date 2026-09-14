@@ -168,7 +168,10 @@
 
 /* --- Verso ---------------------------------------------------------------- */
 
-.is-face-down .card {
+/* A classe fica no host, então é `:host(...)`: como `.is-face-down .card` o
+   seletor ganhava o atributo de conteúdo, que o host não tem, e nunca casava.
+   O verso saía como uma carta creme com a flor-de-lis preta em cima. */
+:host(.is-face-down) .card {
   background:
     repeating-linear-gradient(45deg, rgba(255, 45, 149, 0.35) 0 6px, transparent 6px 12px),
     repeating-linear-gradient(-45deg, rgba(139, 92, 246, 0.35) 0 6px, transparent 6px 12px),
