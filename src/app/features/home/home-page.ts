@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  effect,
   inject,
   signal,
   viewChild,
@@ -50,6 +51,13 @@ export class HomePage {
   protected readonly arrived = this.countdown.arrived;
   protected readonly progress = this.countdown.progress;
 
+  /** Menos de um dia: o cenário inteiro acelera junto com ela. */
+  protected readonly eve = computed(() => {
+    const stage = this.countdown.stage();
+
+    return stage !== 'journey' && stage !== 'arrived';
+  });
+
   protected readonly panelOpen = signal(false);
 
   /** `undefined` no dia 15, quando a comemoração toma o lugar do contador. */
@@ -65,6 +73,15 @@ export class HomePage {
     // Atalho para quem já sabe o caminho: /?painel
     const hasQueryParam = inject(ActivatedRoute).snapshot.queryParamMap.has('painel');
     if (hasQueryParam) this.panelOpen.set(true);
+
+    // Nos últimos dez segundos a página a leva de volta ao topo: a contagem
+    // cobre a tela onde ela estiver, mas a detonação e o Ás acontecem no herói,
+    // e ela pode estar lá embaixo, na Área de Eventos.
+    effect(() => {
+      if (this.countdown.stage() !== 'final' || typeof window === 'undefined') return;
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
   }
 
   /** Cinco toques seguidos no naipe do rodapé abrem os bastidores. */

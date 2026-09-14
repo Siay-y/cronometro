@@ -1,11 +1,13 @@
-<app-kinetic-backdrop [intensity]="progress()" />
+<app-kinetic-backdrop [intensity]="progress()" [surge]="eve()" />
 
 <main class="shell">
   @if (ready()) {
+    <!-- À meia-noite o contador detona (a saída dele) e a comemoração sobe do
+         clarão. Quem chega depois só vê a comemoração subir. -->
     @if (arrived()) {
-      <app-birthday-reveal animate.enter="anim-fade-in" />
+      <app-birthday-reveal animate.enter="anim-ashes-in" />
     } @else {
-      <app-countdown-hero animate.enter="anim-fade-in" />
+      <app-countdown-hero animate.enter="anim-fade-in" animate.leave="anim-detonate" />
     }
 
     <!-- Marca o fim do herói: o cabeçalho aparece quando ela passa daqui. -->

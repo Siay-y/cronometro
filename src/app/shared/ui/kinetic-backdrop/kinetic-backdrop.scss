@@ -38,6 +38,12 @@
     scale var(--dur-5) var(--ease-out);
 }
 
+/* Na véspera o cenário inteiro fica inquieto: as auras respiram no dobro do
+   ritmo e nada fica parado (a deriva dos naipes acelera pelo .html). */
+:host(.is-surging) .aura {
+  animation-duration: 5s;
+}
+
 /* Cada aura se desloca um tanto diferente: é o que cria a sensação de camadas. */
 .aura--magenta {
   inset-inline-start: -18%;
@@ -178,9 +184,10 @@
   }
 }
 
-/* Em telas pequenas, menos elementos flutuando = mais bateria e menos ruído. */
+/* Em telas pequenas, menos elementos flutuando = mais bateria e menos ruído.
+   Na véspera, não: o céu cheio faz parte do clima. */
 @media (max-width: 560px) {
-  .drift:nth-child(n + 12) {
+  :host(:not(.is-surging)) .drift:nth-child(n + 12) {
     display: none;
   }
 

@@ -142,6 +142,41 @@
   }
 }
 
+/* Cada segundo da contagem final cai na tela com uma batida. */
+@keyframes finalTick {
+  0% {
+    opacity: 0;
+    transform: scale(1.7);
+    filter: blur(10px);
+  }
+  35% {
+    opacity: 1;
+    transform: scale(0.94);
+    filter: blur(0);
+  }
+  55% {
+    transform: scale(1.04);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* A comemoração sobe do clarão da meia-noite, e não de um fade. */
+@keyframes ashesIn {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 40px, 0) scale(0.92);
+    filter: blur(10px) brightness(2.4);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: blur(0) brightness(1);
+  }
+}
+
 /* --- Classes de entrada/saída (Angular `animate.enter` / `animate.leave`) - */
 
 .anim-fade-in {
@@ -163,6 +198,18 @@
 .anim-deal {
   animation: dealCard var(--dur-4) var(--ease-spring) both;
 }
+
+.anim-final-tick {
+  animation: finalTick var(--dur-3) var(--ease-expo) both;
+}
+
+/* O atraso deixa o clarão da detonação chegar ao pico antes de o Ás subir. */
+.anim-ashes-in {
+  animation: ashesIn 1000ms var(--ease-expo) 280ms both;
+}
+
+/* `.anim-detonate` (a saída do contador à meia-noite) mora no próprio
+   contador: ela precisa de `:host()` para chegar no clarão e no herói. */
 
 /* --- Acessibilidade ------------------------------------------------------ */
 

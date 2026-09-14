@@ -1,15 +1,7 @@
 <section class="reveal">
-  <div class="burst" aria-hidden="true">
-    @for (spark of sparks; track spark.id) {
-      <i
-        class="spark spark--{{ spark.reach }}"
-        [style.rotate.deg]="spark.angle"
-        [style.animation-delay.ms]="spark.delay"
-        >{{ spark.glyph }}</i
-      >
-    }
+  <app-spark-burst class="burst">
     <app-playing-card class="reveal__card" rank="A" suit="♥" [charge]="1" />
-  </div>
+  </app-spark-burst>
 
   <p class="eyebrow">Enfim</p>
 

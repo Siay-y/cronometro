@@ -1,3 +1,7 @@
+:host {
+  display: block;
+}
+
 .hero {
   display: grid;
   justify-items: center;
@@ -8,6 +12,7 @@
 
 .hero__card {
   --card-w: clamp(74px, 20vw, 110px);
+  --heat: 0;
   rotate: -7deg;
   animation: riseIn var(--dur-5) var(--ease-spring) both;
   transition: rotate var(--dur-4) var(--ease-spring);
@@ -15,6 +20,33 @@
 
 .hero__card:hover {
   rotate: 4deg;
+}
+
+/* Na última hora a carta treme, e treme mais conforme `--heat` sobe. Anima só
+   `translate`, para compor com o giro de repouso e a entrada sem disputa. */
+:host(.is-last-hour) .hero__card {
+  animation:
+    riseIn var(--dur-5) var(--ease-spring) both,
+    tremble 340ms var(--ease-in-out) infinite;
+}
+
+@keyframes tremble {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  20% {
+    translate: calc((0.3 + var(--heat)) * -2.6px) calc((0.3 + var(--heat)) * 1px);
+  }
+  40% {
+    translate: calc((0.3 + var(--heat)) * 2.6px) calc((0.3 + var(--heat)) * -1.2px);
+  }
+  60% {
+    translate: calc((0.3 + var(--heat)) * -1.8px) calc((0.3 + var(--heat)) * 1.6px);
+  }
+  80% {
+    translate: calc((0.3 + var(--heat)) * 2px) calc((0.3 + var(--heat)) * 0.8px);
+  }
 }
 
 .hero__title {
@@ -48,6 +80,11 @@
   inline-size: 100%;
 }
 
+/* Com três casas em vez de quatro sobra espaço: os dígitos crescem. */
+.clock--eve {
+  --fs-digit: clamp(2.9rem, 15vw, 7.5rem);
+}
+
 .clock__sep {
   font-family: var(--font-display);
   font-size: calc(var(--fs-digit) * 0.62);
@@ -57,6 +94,7 @@
 }
 
 .charge {
+  --charge: 0;
   inline-size: min(100%, 460px);
   display: grid;
   gap: var(--sp-2);
@@ -64,10 +102,10 @@
 }
 
 .charge__track {
+  position: relative;
   block-size: 6px;
   border-radius: var(--r-pill);
   background: rgba(255, 255, 255, 0.07);
-  overflow: hidden;
 }
 
 .charge__fill {
@@ -77,6 +115,80 @@
   box-shadow: var(--glow-md);
   transform-origin: left center;
   transition: transform var(--dur-5) var(--ease-out);
+}
+
+/* --- Superaquecida ----------------------------------------------------------
+   Na véspera a energia passa do que a barra aguenta: o preenchimento vibra de
+   brilho e fagulhas saltam da ponta. `--charge` posiciona as fagulhas onde a
+   barra termina de verdade.
+   ---------------------------------------------------------------------------- */
+
+.is-overcharged .charge__fill {
+  animation: overcharge 1.1s var(--ease-in-out) infinite;
+}
+
+@keyframes overcharge {
+  0%,
+  100% {
+    filter: brightness(1) saturate(1);
+    box-shadow: var(--glow-md);
+  }
+  50% {
+    filter: brightness(1.6) saturate(1.3);
+    box-shadow: var(--glow-lg);
+  }
+}
+
+.charge__sparks {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: calc(var(--charge) * 100%);
+  pointer-events: none;
+}
+
+.charge__sparks i {
+  position: absolute;
+  inline-size: 4px;
+  block-size: 4px;
+  margin: -2px 0 0 -2px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 8px var(--c-magenta-soft);
+  animation: chargeSpark 900ms var(--ease-out) infinite both;
+}
+
+.charge__sparks i:nth-child(1) {
+  --sx: -14px;
+  --sy: -18px;
+}
+
+.charge__sparks i:nth-child(2) {
+  --sx: 12px;
+  --sy: -22px;
+  animation-delay: 220ms;
+}
+
+.charge__sparks i:nth-child(3) {
+  --sx: 18px;
+  --sy: -9px;
+  animation-delay: 470ms;
+}
+
+.charge__sparks i:nth-child(4) {
+  --sx: -6px;
+  --sy: -26px;
+  animation-delay: 650ms;
+}
+
+@keyframes chargeSpark {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--sx), var(--sy)) scale(0.2);
+  }
 }
 
 .charge__caption {
@@ -92,6 +204,11 @@
   color: var(--c-magenta-soft);
 }
 
+.is-overcharged .charge__caption strong {
+  color: #fff;
+  text-shadow: 0 0 12px var(--c-magenta);
+}
+
 .hero__date {
   color: var(--c-text-faint);
   font-size: 0.92rem;
@@ -100,6 +217,126 @@
 
 .hero__tagline {
   font-size: clamp(1.05rem, 4vw, 1.35rem);
+}
+
+/* --- Os últimos dez segundos -------------------------------------------------
+   A contagem toma a tela inteira, por cima de tudo (menos de um presente
+   aberto). Um número por vez: o anterior some, o novo desce com a batida.
+   ---------------------------------------------------------------------------- */
+
+.finale {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  background: radial-gradient(circle at 50% 50%, rgba(255, 45, 149, 0.2), rgba(5, 3, 11, 0.95) 68%);
+  animation: fadeIn var(--dur-3) var(--ease-out) both;
+}
+
+.finale__second {
+  grid-area: 1 / 1;
+  font-family: var(--font-display);
+  font-size: clamp(11rem, 62vw, 26rem);
+  line-height: 1;
+  background: var(--grad-kinetic);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 40px rgba(255, 45, 149, 0.7));
+}
+
+.finale__ring {
+  grid-area: 1 / 1;
+  inline-size: min(70vw, 360px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 45, 149, 0.6);
+  animation: finalRing 1s var(--ease-out) infinite;
+}
+
+@keyframes finalRing {
+  from {
+    opacity: 0.9;
+    transform: scale(0.6);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.5);
+  }
+}
+
+/* --- A detonação da meia-noite -----------------------------------------------
+   O pai troca este componente pela comemoração com `animate.leave`: a página
+   inteira clareia, a carta e o contador estouram e, do clarão, sobe o Ás.
+   O próprio host anima só a opacidade: qualquer `transform`/`filter` nele
+   prenderia o clarão fixo dentro do herói em vez de cobrir a tela toda.
+   ---------------------------------------------------------------------------- */
+
+.hero__flash {
+  position: fixed;
+  inset: 0;
+  z-index: 55;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(circle at 50% 30%, #fff 0%, var(--c-magenta) 30%, transparent 75%);
+}
+
+:host(.anim-detonate) {
+  /* Sai do fluxo para a comemoração já nascer no lugar dele, e não embaixo. */
+  position: absolute;
+  inset-inline: 0;
+  inset-block-start: 0;
+  z-index: 2;
+  pointer-events: none;
+  animation: detonateHost 900ms var(--ease-out) both;
+}
+
+:host(.anim-detonate) .hero {
+  animation: detonateHero 900ms var(--ease-expo) both;
+}
+
+:host(.anim-detonate) .hero__flash {
+  animation: midnightFlash 900ms var(--ease-out) both;
+}
+
+@keyframes detonateHost {
+  0%,
+  55% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes detonateHero {
+  0% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+  30% {
+    transform: scale(1.03);
+    filter: brightness(1.9);
+  }
+  100% {
+    transform: scale(1.22);
+    filter: brightness(5) blur(18px);
+    opacity: 0;
+  }
+}
+
+@keyframes midnightFlash {
+  0% {
+    opacity: 0;
+  }
+  22% {
+    opacity: 0.95;
+  }
+  100% {
+    opacity: 0;
+  }
 }
 
 @media (min-width: 640px) {

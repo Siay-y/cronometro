@@ -6,10 +6,8 @@
   padding-block: clamp(var(--sp-6), 9vw, var(--sp-8)) var(--sp-6);
 }
 
+/* O estouro em si mora em `app-spark-burst`; aqui só o tamanho da área. */
 .burst {
-  position: relative;
-  display: grid;
-  place-items: center;
   inline-size: min(70vw, 260px);
   aspect-ratio: 1;
 }
@@ -17,58 +15,6 @@
 .reveal__card {
   --card-w: clamp(96px, 26vw, 140px);
   animation: riseIn var(--dur-5) var(--ease-spring) both;
-}
-
-.spark {
-  position: absolute;
-  font-style: normal;
-  font-size: clamp(0.9rem, 3.4vw, 1.4rem);
-  color: var(--c-magenta-soft);
-  text-shadow: 0 0 12px rgba(255, 45, 149, 0.8);
-  animation: sparkFly 3.4s var(--ease-out) infinite;
-  will-change: transform, opacity;
-}
-
-.spark--near {
-  --spark-distance: 28vmin;
-}
-
-.spark--mid {
-  --spark-distance: 38vmin;
-}
-
-.spark--far {
-  --spark-distance: 48vmin;
-}
-
-/* Em celular os estilhaços passavam da borda da tela e criavam rolagem
-   lateral: encurtamos o alcance para caberem dentro do próprio estouro. */
-@media (max-width: 560px) {
-  .spark--near {
-    --spark-distance: 20vmin;
-  }
-
-  .spark--mid {
-    --spark-distance: 27vmin;
-  }
-
-  .spark--far {
-    --spark-distance: 34vmin;
-  }
-}
-
-@keyframes sparkFly {
-  0% {
-    opacity: 0;
-    transform: translateY(0) scale(0.3);
-  }
-  15% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(calc(var(--spark-distance, 36vmin) * -1)) scale(1.1);
-  }
 }
 
 .reveal__title {

@@ -1,0 +1,89 @@
+:host {
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+
+.sparks {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+.spark {
+  position: absolute;
+  font-style: normal;
+  font-size: clamp(0.9rem, 3.4vw, 1.4rem);
+  color: var(--c-magenta-soft);
+  text-shadow: 0 0 12px rgba(255, 45, 149, 0.8);
+  animation: sparkFly 3.4s var(--ease-out) infinite;
+  will-change: transform, opacity;
+}
+
+.spark--near {
+  --spark-distance: 28vmin;
+}
+
+.spark--mid {
+  --spark-distance: 38vmin;
+}
+
+.spark--far {
+  --spark-distance: 48vmin;
+}
+
+/* Em celular os estilhaços passavam da borda da tela e criavam rolagem
+   lateral: encurtamos o alcance para caberem dentro do próprio estouro. */
+@media (max-width: 560px) {
+  .spark--near {
+    --spark-distance: 20vmin;
+  }
+
+  .spark--mid {
+    --spark-distance: 27vmin;
+  }
+
+  .spark--far {
+    --spark-distance: 34vmin;
+  }
+}
+
+/* Dentro de um painel: alcance curto e fixo, e o que passar da caixa é
+   cortado, para o estouro nunca virar barra de rolagem. */
+:host(.is-tight) {
+  overflow: hidden;
+}
+
+:host(.is-tight) .spark {
+  font-size: clamp(0.85rem, 3.2vw, 1.15rem);
+  /* Mais curto e mais rápido: num painel, o estouro é um sopro, não um céu. */
+  animation-duration: 2.6s;
+}
+
+:host(.is-tight) .spark--near {
+  --spark-distance: 66px;
+}
+
+:host(.is-tight) .spark--mid {
+  --spark-distance: 92px;
+}
+
+:host(.is-tight) .spark--far {
+  --spark-distance: 118px;
+}
+
+@keyframes sparkFly {
+  0% {
+    opacity: 0;
+    transform: translateY(0) scale(0.3);
+  }
+  15% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(calc(var(--spark-distance, 36vmin) * -1)) scale(1.1);
+  }
+}

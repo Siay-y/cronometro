@@ -92,6 +92,12 @@ export interface GiftEvent {
   readonly letter?: SealedLetter;
   /** Caixa embrulhada opcional: rende um presente para abrir dentro da revelação. */
   readonly gift?: SealedGift;
+  /**
+   * O presente principal. A revelação dele abre diferente de todas as outras:
+   * painel dourado, o Ás no lugar da carta de estrela, o estouro de naipes na
+   * abertura e a última frase chegando sozinha, depois de uma pausa.
+   */
+  readonly finale?: boolean;
   readonly accent: GiftAccent;
   /** Instante em que o presente destrava, no formato `AAAA-MM-DDTHH:mm`. */
   readonly opensAt: string;

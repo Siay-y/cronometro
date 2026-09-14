@@ -11,14 +11,27 @@
     <span aria-hidden="true">✕</span>
   </button>
 
-  <app-playing-card class="panel__card" rank="★" suit="♦" [emblem]="event().icon" [charge]="1" />
+  <!-- O presente principal abre com o Ás no meio de um estouro de naipes; os
+       outros, com a carta de estrela e o emblema deles. -->
+  @if (finale()) {
+    <app-spark-burst tight class="panel__burst">
+      <app-playing-card class="panel__card" rank="A" suit="♥" [charge]="1" />
+    </app-spark-burst>
+  } @else {
+    <app-playing-card class="panel__card" rank="★" suit="♦" [emblem]="event().icon" [charge]="1" />
+  }
 
   <p class="eyebrow">{{ view().opensAtMs | schedule: 'long' }}</p>
   <h2 class="panel__title kinetic-text">{{ event().title }}</h2>
 
   <div class="panel__message">
     @for (paragraph of paragraphs(); track $index) {
-      <p [style.animation-delay.ms]="120 + $index * 140">{{ paragraph }}</p>
+      <p
+        [class.is-finale-last]="finale() && $last"
+        [style.animation-delay.ms]="delayFor($index, $last)"
+      >
+        {{ paragraph }}
+      </p>
     }
   </div>
 

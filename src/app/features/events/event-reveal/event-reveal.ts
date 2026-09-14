@@ -13,8 +13,10 @@ import {
 } from '@angular/core';
 import { CELEBRATION_CONFIG } from '../../../core/config/celebration.config';
 import { GiftEventView } from '../../../core/models/gift-event.model';
+import { vibrate } from '../../../core/utils/haptics.util';
 import { SchedulePipe } from '../../../shared/pipes/schedule.pipe';
 import { PlayingCard } from '../../../shared/ui/playing-card/playing-card';
+import { SparkBurst } from '../../../shared/ui/spark-burst/spark-burst';
 import { GiftBox } from '../gift-box/gift-box';
 import { LetterEnvelope } from '../letter-envelope/letter-envelope';
 
@@ -36,21 +38,33 @@ const HEARTS_PER_CLICK = 14;
 const MAX_HEARTS = 90;
 const HEART_VARIANTS = 5;
 
+/** Cadência dos parágrafos: o primeiro entra logo, os outros um atrás do outro. */
+const PARAGRAPH_DELAY_MS = 120;
+const PARAGRAPH_STEP_MS = 140;
+/** No presente principal, a última frase espera o resto assentar antes de vir. */
+const FINALE_PAUSE_MS = 1400;
+/** O estouro do presente principal também bate no celular dela. */
+const FINALE_PULSE = [40, 60, 40, 60, 120] as const;
+
 /**
  * A revelação de um presente.
  *
  * A entrada e a saída ficam a cargo do pai, via `animate.enter`/`animate.leave`
  * no próprio elemento. Aqui dentro cuidamos só do essencial de um diálogo:
  * foco, Escape e travar a rolagem do fundo.
+ *
+ * O presente principal (`finale`) abre diferente: painel dourado, o Ás no lugar
+ * da carta de estrela, o estouro de naipes e a última frase chegando sozinha.
  */
 @Component({
   selector: 'app-event-reveal',
-  imports: [SchedulePipe, PlayingCard, LetterEnvelope, GiftBox],
+  imports: [SchedulePipe, PlayingCard, SparkBurst, LetterEnvelope, GiftBox],
   templateUrl: './event-reveal.html',
   styleUrl: './event-reveal.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '(document:keydown.escape)': 'dismiss.emit()',
+    '[class.is-finale]': 'finale()',
   },
 })
 export class EventReveal {
@@ -62,6 +76,7 @@ export class EventReveal {
   private readonly closeButton = viewChild<ElementRef<HTMLButtonElement>>('closeButton');
 
   protected readonly event = computed(() => this.view().event);
+  protected readonly finale = computed(() => this.event().finale === true);
 
   /** Cada linha em branco da mensagem vira um parágrafo. */
   protected readonly paragraphs = computed(() =>
@@ -70,6 +85,13 @@ export class EventReveal {
       .map((line) => line.trim())
       .filter(Boolean),
   );
+
+  /** Quando cada parágrafo entra. No finale, o último espera uma pausa a mais. */
+  protected delayFor(index: number, last: boolean): number {
+    const base = PARAGRAPH_DELAY_MS + index * PARAGRAPH_STEP_MS;
+
+    return this.finale() && last ? base + FINALE_PAUSE_MS : base;
+  }
 
   protected readonly hearts = signal<readonly Heart[]>([]);
   /** A batida forte do botão, no toque dela. */
@@ -120,6 +142,7 @@ export class EventReveal {
   constructor() {
     afterNextRender(() => {
       this.closeButton()?.nativeElement.focus();
+      if (this.finale()) vibrate(FINALE_PULSE);
 
       const previousOverflow = document.body.style.overflow;
       document.body.style.overflow = 'hidden';

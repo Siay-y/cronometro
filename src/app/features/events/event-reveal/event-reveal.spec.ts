@@ -114,4 +114,43 @@ describe('EventReveal', () => {
 
     expect(hearts().length).toBe(90);
   });
+
+  describe('o presente principal', () => {
+    beforeEach(() => {
+      fixture.componentRef.setInput(
+        'view',
+        describeGiftEvent(
+          { ...EVENT, finale: true, message: 'Feliz aniversário.\n\nVem cá.' },
+          parseLocalDateTime(EVENT.opensAt) + 60_000,
+          false,
+        ),
+      );
+      fixture.detectChanges();
+    });
+
+    it('abre dourado, com o Ás no meio do estouro de naipes', () => {
+      expect(host.classList.contains('is-finale')).toBe(true);
+      expect(host.querySelector('app-spark-burst .panel__card')).toBeTruthy();
+      expect(host.querySelector('.panel__card')?.getAttribute('aria-label')).toBe('Carta A de ♥');
+      // O estouro fica curto de propósito: o painel rola, e cortaria o resto.
+      expect(host.querySelector('app-spark-burst')?.classList.contains('is-tight')).toBe(true);
+    });
+
+    it('segura a última frase para ela chegar sozinha', () => {
+      const [first, last] = [...host.querySelectorAll<HTMLElement>('.panel__message p')];
+
+      expect(first.style.animationDelay).toBe('120ms');
+      expect(first.classList.contains('is-finale-last')).toBe(false);
+      // 120 + 140, e mais a pausa de 1400.
+      expect(last.style.animationDelay).toBe('1660ms');
+      expect(last.classList.contains('is-finale-last')).toBe(true);
+      expect(last.textContent?.trim()).toBe('Vem cá.');
+    });
+  });
+
+  it('nos outros presentes, a carta de estrela com o emblema, sem estouro', () => {
+    expect(host.classList.contains('is-finale')).toBe(false);
+    expect(host.querySelector('app-spark-burst')).toBeNull();
+    expect(host.querySelector('.panel__card')?.getAttribute('aria-label')).toBe('Carta ★ de ♦');
+  });
 });

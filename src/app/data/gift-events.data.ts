@@ -15,6 +15,9 @@ import { GiftEvent } from '../core/models/gift-event.model';
  *                      lacrado: ela aperta o botão, o lacre estala, a aba
  *                      levanta e o papel sai de dentro. É onde vão os textos
  *                      longos, que não caberiam no `message`.
+ *  • `finale`          opcional, `true` só no presente principal: a revelação
+ *                      abre com estouro de naipes, painel dourado e a última
+ *                      frase chegando sozinha, depois de uma pausa.
  *
  *  Dica: dá para montar tudo pelo painel (5 toques no naipe do rodapé) e usar
  *  o botão "Copiar como código" para colar a lista pronta aqui.
@@ -150,5 +153,8 @@ export const GIFT_EVENTS: readonly GiftEvent[] = [
     accent: 'gold',
     opensAt: '2026-09-15T00:05',
     durationMinutes: 2880,
+    // O único que abre com estouro de naipes, painel dourado e o "Vem cá."
+    // chegando sozinho no fim.
+    finale: true,
   },
 ];

@@ -1,5 +1,6 @@
 import {
   afterNextRender,
+  booleanAttribute,
   ChangeDetectionStrategy,
   Component,
   computed,
@@ -29,6 +30,8 @@ const VARIANTS = ['driftA', 'driftB', 'driftC'] as const;
 const FOLLOW_EASING = 0.12;
 /** Abaixo disso o cursor é considerado parado e o loop de animação descansa. */
 const SETTLED_PX = 0.4;
+/** Na véspera, cada naipe faz o mesmo trajeto em menos da metade do tempo. */
+const SURGE_TEMPO = 0.45;
 
 /**
  * PRNG com semente fixa: o servidor e o navegador geram exatamente o mesmo
@@ -76,11 +79,16 @@ const CARDS: readonly DriftingCard[] = ((): DriftingCard[] => {
   templateUrl: './kinetic-backdrop.html',
   styleUrl: './kinetic-backdrop.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { 'aria-hidden': 'true' },
+  host: { 'aria-hidden': 'true', '[class.is-surging]': 'surge()' },
 })
 export class KineticBackdrop {
   /** Energia acumulada (0 a 1): quanto mais perto do dia, mais forte o brilho. */
   readonly intensity = input(0.35);
+  /** A véspera: as auras respiram mais rápido e os naipes correm mais. */
+  readonly surge = input(false, { transform: booleanAttribute });
+
+  /** Multiplica a duração da deriva de cada naipe: menor é mais agitado. */
+  protected readonly tempo = computed(() => (this.surge() ? SURGE_TEMPO : 1));
 
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly destroyRef = inject(DestroyRef);

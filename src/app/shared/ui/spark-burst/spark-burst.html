@@ -1,0 +1,12 @@
+<span class="sparks" aria-hidden="true">
+  @for (spark of sparks; track spark.id) {
+    <i
+      class="spark spark--{{ spark.reach }}"
+      [style.rotate.deg]="spark.angle"
+      [style.animation-delay.ms]="spark.delay"
+      >{{ spark.glyph }}</i
+    >
+  }
+</span>
+
+<ng-content />

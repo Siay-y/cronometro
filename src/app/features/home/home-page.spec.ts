@@ -4,12 +4,21 @@ import { vi } from 'vitest';
 import { ClockService } from '../../core/services/clock.service';
 import { HomePage } from './home-page';
 
+/**
+ * Um dia qualquer no meio da jornada. Sem prender o relógio, o teste mudaria de
+ * cara conforme o calendário real: na véspera o herói troca de texto, e no dia
+ * a comemoração toma o lugar dele.
+ */
+const MID_JOURNEY = new Date('2026-09-05T12:00');
+
 describe('HomePage', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [HomePage],
       providers: [provideRouter([])],
     }).compileComponents();
+
+    TestBed.inject(ClockService).travelTo(MID_JOURNEY);
   });
 
   it('mantém o relógio parado até a primeira renderização (o HTML do SSR mostra o intro)', () => {
@@ -40,6 +49,60 @@ describe('HomePage', () => {
 
     expect(header).toBeTruthy();
     expect(header.classList.contains('is-pinned')).toBe(false);
+  });
+
+  it('acelera o cenário na véspera e o acalma de novo no dia', async () => {
+    const fixture = TestBed.createComponent(HomePage);
+    const clock = TestBed.inject(ClockService);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const backdrop = fixture.nativeElement.querySelector('app-kinetic-backdrop') as HTMLElement;
+
+    expect(backdrop.classList.contains('is-surging')).toBe(false);
+
+    clock.travelTo(new Date('2026-09-14T18:00'));
+    fixture.detectChanges();
+    expect(backdrop.classList.contains('is-surging')).toBe(true);
+
+    clock.travelTo(new Date('2026-09-15T00:00:01'));
+    fixture.detectChanges();
+    expect(backdrop.classList.contains('is-surging')).toBe(false);
+  });
+
+  it('troca o contador pela comemoração quando o relógio vira', async () => {
+    const fixture = TestBed.createComponent(HomePage);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const host = fixture.nativeElement as HTMLElement;
+    expect(host.querySelector('app-countdown-hero')).toBeTruthy();
+    expect(host.querySelector('app-birthday-reveal')).toBeNull();
+
+    TestBed.inject(ClockService).travelTo(new Date('2026-09-15T00:00:01'));
+    fixture.detectChanges();
+
+    expect(host.querySelector('app-birthday-reveal')).toBeTruthy();
+    expect(host.textContent).toContain('Bon anniversaire');
+  });
+
+  it('leva a página de volta ao topo quando a contagem final começa', async () => {
+    const scrollTo = vi.spyOn(window, 'scrollTo').mockImplementation(() => undefined);
+    const fixture = TestBed.createComponent(HomePage);
+    const clock = TestBed.inject(ClockService);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    clock.travelTo(new Date('2026-09-14T23:58:00.500'));
+    fixture.detectChanges();
+    expect(scrollTo).not.toHaveBeenCalled();
+
+    clock.travelTo(new Date('2026-09-14T23:59:52.500'));
+    fixture.detectChanges();
+    expect(scrollTo).toHaveBeenCalledWith({ top: 0, behavior: 'smooth' });
   });
 
   it('esconde o conteúdo das cartas ainda seladas', async () => {
@@ -93,6 +156,8 @@ describe('HomePage: cabeçalho ao rolar', () => {
       imports: [HomePage],
       providers: [provideRouter([])],
     }).compileComponents();
+
+    TestBed.inject(ClockService).travelTo(MID_JOURNEY);
   });
 
   afterEach(() => vi.unstubAllGlobals());

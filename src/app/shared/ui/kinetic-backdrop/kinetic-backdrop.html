@@ -13,7 +13,7 @@
       [style.font-size.px]="card.size"
       [style.opacity]="card.opacity"
       [style.animation-name]="card.variant"
-      [style.animation-duration.s]="card.duration"
+      [style.animation-duration.s]="card.duration * tempo()"
       [style.animation-delay.s]="card.delay"
       >{{ card.suit }}</span
     >

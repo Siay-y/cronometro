@@ -1,6 +1,14 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  inject,
+  signal,
+} from '@angular/core';
 import { CELEBRATION_CONFIG } from '../../../core/config/celebration.config';
 import { GiftEventView } from '../../../core/models/gift-event.model';
+import { CountdownService } from '../../../core/services/countdown.service';
 import { GiftEventsStore } from '../../../core/state/gift-events.store';
 import { DurationPipe } from '../../../shared/pipes/duration.pipe';
 import { EventCard } from '../event-card/event-card';
@@ -21,7 +29,17 @@ import { EventReveal } from '../event-reveal/event-reveal';
 })
 export class EventsSection {
   private readonly store = inject(GiftEventsStore);
+  private readonly countdown = inject(CountdownService);
   private readonly selectedId = signal<string | null>(null);
+
+  constructor() {
+    // Nos últimos dez segundos o site fecha o que estiver aberto: a contagem
+    // final e a detonação acontecem atrás do painel, e ela não pode perder isso
+    // por estar relendo a carta das 23:00.
+    effect(() => {
+      if (this.countdown.stage() === 'final') this.close();
+    });
+  }
 
   protected readonly config = inject(CELEBRATION_CONFIG);
   protected readonly views = this.store.views;

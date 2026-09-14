@@ -109,6 +109,50 @@
   font-size: clamp(1.1rem, 4vw, 1.4rem);
 }
 
+/* --- O presente principal ---------------------------------------------------
+   Dourado em vez de magenta, o Ás no meio do estouro de naipes, e a última
+   frase chegando sozinha, maior, depois que o resto assentou.
+   ---------------------------------------------------------------------------- */
+
+.panel__burst {
+  inline-size: min(62vw, 240px);
+  aspect-ratio: 1;
+  /* O estouro é quadrado, mas a carta dentro dele é alta: sem isto o painel
+     ganharia um vão em cima e embaixo da carta. */
+  margin-block: -8%;
+}
+
+:host(.is-finale) .panel {
+  border-color: color-mix(in srgb, var(--c-gold) 55%, transparent);
+  box-shadow:
+    var(--shadow-float),
+    0 0 22px rgba(246, 196, 83, 0.35),
+    0 0 70px rgba(255, 45, 149, 0.2);
+}
+
+:host(.is-finale) .panel::before {
+  background: linear-gradient(90deg, var(--c-gold), var(--c-magenta), var(--c-gold));
+  box-shadow: 0 0 18px rgba(246, 196, 83, 0.6);
+}
+
+:host(.is-finale) .panel__title {
+  background: linear-gradient(135deg, #fff1c4 0%, var(--c-gold) 45%, var(--c-magenta) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  filter: drop-shadow(0 4px 22px rgba(246, 196, 83, 0.35));
+}
+
+.is-finale-last {
+  justify-self: center;
+  margin-block-start: var(--sp-2);
+  text-align: center;
+  font-family: var(--font-script);
+  font-style: italic;
+  font-size: clamp(1.5rem, 6vw, 2.1rem);
+  color: var(--c-gold);
+  text-shadow: 0 0 18px rgba(246, 196, 83, 0.45);
+}
+
 /* --- Merci ------------------------------------------------------------------
    O botão não é uma pílula com um texto: é um coração que bate sozinho, no
    compasso de um coração de verdade (duas batidas e uma pausa). Cada toque é
