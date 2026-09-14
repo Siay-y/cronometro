@@ -1,0 +1,89 @@
+:host {
+  position: absolute;
+  inset: 0;
+  display: block;
+  overflow: hidden;
+  border-radius: 2px;
+  /* O dedo raspa, não rola a página nem seleciona nada. */
+  touch-action: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  cursor: grab;
+  transition: opacity 640ms var(--ease-out);
+}
+
+:host(:active) {
+  cursor: grabbing;
+}
+
+/* Raspou o bastante: o que sobrou se dissolve e some. */
+:host(.is-revealed) {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.foil {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35);
+}
+
+.foil__sparks {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.spark {
+  position: absolute;
+  translate: -50% -50%;
+  font-style: normal;
+  font-size: 0.9rem;
+  color: #fff;
+  text-shadow:
+    0 0 6px #fff,
+    0 0 14px var(--c-magenta);
+  animation: sparkOff 560ms var(--ease-out) both;
+}
+
+.spark--2 {
+  --sx: 14px;
+  --sy: -18px;
+}
+
+.spark--3 {
+  --sx: -12px;
+  --sy: -16px;
+}
+
+.spark--4 {
+  --sx: 8px;
+  --sy: -24px;
+}
+
+@keyframes sparkOff {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) scale(0.4) rotate(0deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--sx, -6px), var(--sy, -22px)) scale(1) rotate(90deg);
+  }
+}
+
+/* O botão escondido ganha foco pelo teclado, e aí aparece. */
+.foil__skip:focus-visible {
+  position: absolute;
+  inset: auto var(--sp-2) var(--sp-2);
+  width: auto;
+  height: auto;
+  padding: var(--sp-2) var(--sp-3);
+  clip-path: none;
+  white-space: normal;
+  border-radius: var(--r-pill);
+  background: rgba(19, 10, 32, 0.9);
+  color: #fff;
+  font-size: 0.8rem;
+}

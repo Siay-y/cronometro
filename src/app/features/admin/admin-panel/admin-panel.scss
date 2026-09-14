@@ -204,7 +204,11 @@
 }
 
 .list__icon {
+  display: grid;
+  place-items: center;
+  inline-size: 1.6rem;
   font-size: 1.3rem;
+  color: var(--c-magenta-soft);
 }
 
 .list__text {

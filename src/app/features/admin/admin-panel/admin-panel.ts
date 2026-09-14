@@ -12,6 +12,7 @@ import {
   GiftAccent,
   GiftEvent,
   GiftEventView,
+  LetterPhoto,
   SealedGift,
   SealedLetter,
 } from '../../../core/models/gift-event.model';
@@ -22,6 +23,19 @@ import { GiftEventsStore } from '../../../core/state/gift-events.store';
 import { createId } from '../../../core/utils/id.util';
 import { DAY_MS, HOUR_MS, toLocalDateTimeInput } from '../../../core/utils/time.util';
 import { SchedulePipe } from '../../../shared/pipes/schedule.pipe';
+import { Icon, IconName, isIconName } from '../../../shared/ui/icon/icon';
+
+/** Os emblemas do baralho, na ordem em que aparecem como sugestão no painel. */
+const CARD_ICONS: readonly IconName[] = [
+  'joker',
+  'gamepad',
+  'joystick',
+  'bag',
+  'letter',
+  'ribbon',
+  'gift',
+  'spade',
+];
 
 /** Prefixos gravados pela resposta dela (ver `LetterReply`). */
 const REPLY_PREFIX = 'mon-cher:resposta:';
@@ -54,6 +68,9 @@ interface GiftDraft {
   letter?: SealedLetter;
   /** Idem: a caixa de presente viaja junto para sobreviver ao salvamento. */
   gift?: SealedGift;
+  /** Idem: a foto do fim e a marca de presente principal. */
+  photo?: LetterPhoto;
+  finale?: boolean;
 }
 
 function emptyDraft(): GiftDraft {
@@ -62,7 +79,7 @@ function emptyDraft(): GiftDraft {
     title: '',
     teaser: '',
     message: '',
-    icon: '🎁',
+    icon: 'gift',
     accent: 'magenta',
     opensAt: toLocalDateTimeInput(Date.now() + HOUR_MS),
     durationMinutes: 1440,
@@ -78,7 +95,7 @@ function emptyDraft(): GiftDraft {
  */
 @Component({
   selector: 'app-admin-panel',
-  imports: [FormsModule, SchedulePipe],
+  imports: [FormsModule, SchedulePipe, Icon],
   templateUrl: './admin-panel.html',
   styleUrl: './admin-panel.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -93,6 +110,8 @@ export class AdminPanel {
   readonly close = output<void>();
 
   protected readonly accents: readonly GiftAccent[] = ['magenta', 'violet', 'gold'];
+  protected readonly iconNames = CARD_ICONS;
+  protected readonly isIcon = isIconName;
   protected readonly views = this.store.views;
   protected readonly usingCustomList = this.store.usingCustomList;
   protected readonly timeTravelling = this.clock.timeTravelling;
@@ -120,8 +139,20 @@ export class AdminPanel {
   }
 
   protected edit(view: GiftEventView): void {
-    const { id, title, teaser, message, icon, accent, opensAt, durationMinutes, letter, gift } =
-      view.event;
+    const {
+      id,
+      title,
+      teaser,
+      message,
+      icon,
+      accent,
+      opensAt,
+      durationMinutes,
+      letter,
+      gift,
+      photo,
+      finale,
+    } = view.event;
     this.draft.set({
       id,
       title,
@@ -133,6 +164,8 @@ export class AdminPanel {
       durationMinutes,
       letter,
       gift,
+      photo,
+      finale,
     });
   }
 
@@ -149,12 +182,14 @@ export class AdminPanel {
       title: draft.title.trim(),
       teaser: draft.teaser.trim(),
       message: draft.message.trim(),
-      icon: draft.icon.trim() || '🎁',
+      icon: draft.icon.trim() || 'gift',
       accent: draft.accent,
       opensAt: draft.opensAt,
       durationMinutes: Math.max(1, Math.round(draft.durationMinutes)),
       ...(draft.letter ? { letter: draft.letter } : {}),
       ...(draft.gift ? { gift: draft.gift } : {}),
+      ...(draft.photo ? { photo: draft.photo } : {}),
+      ...(draft.finale ? { finale: true } : {}),
     };
 
     this.store.upsert(event);

@@ -9,6 +9,11 @@ export interface LetterPhoto {
   readonly alt: string;
   /** Legenda escrita embaixo da foto. Opcional. */
   readonly caption?: string;
+  /**
+   * Coberta por um foil holográfico de raspadinha: ela raspa com o dedo para
+   * revelar. Só vale onde a foto aparece num porta-retratos.
+   */
+  readonly foil?: boolean;
 }
 
 /**
@@ -86,12 +91,21 @@ export interface GiftEvent {
   readonly teaser: string;
   /** Conteúdo revelado quando o presente abre. Quebras de linha viram parágrafos. */
   readonly message: string;
-  /** Emoji/símbolo estampado na carta. */
+  /**
+   * O emblema no centro da carta: o nome de um ícone do baralho (`joker`,
+   * `gift`...; ver `IconName`), desenhado com a tinta da carta, ou um
+   * símbolo/emoji solto, mostrado como texto.
+   */
   readonly icon: string;
   /** Carta lacrada opcional: rende um envelope para abrir dentro da revelação. */
   readonly letter?: SealedLetter;
   /** Caixa embrulhada opcional: rende um presente para abrir dentro da revelação. */
   readonly gift?: SealedGift;
+  /**
+   * Uma foto no fim da mensagem, num porta-retratos de papel. Chega depois do
+   * último parágrafo; tocar nela abre o retrato de perto.
+   */
+  readonly photo?: LetterPhoto;
   /**
    * O presente principal. A revelação dele abre diferente de todas as outras:
    * painel dourado, o Ás no lugar da carta de estrela, o estouro de naipes na

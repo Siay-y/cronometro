@@ -1,0 +1,26 @@
+<div class="frame__wrap" [class.is-foiled]="foiled()">
+  <!-- A foto se acomoda num porta-retratos de papel. Tocar nela abre o visor. -->
+  <button type="button" class="frame" (click)="view()" aria-label="Ver a foto de perto">
+    <img [src]="photo().src" [alt]="photo().alt" />
+    @if (photo().caption; as caption) {
+      <span class="frame__caption">{{ caption }}</span>
+    }
+    <span class="frame__peek" aria-hidden="true">
+      <app-icon name="spark" />
+      {{ foiled() ? 'raspe com o dedo para revelar' : 'toque para ver de perto' }}
+    </span>
+  </button>
+
+  <!-- A raspadinha fica por cima da foto, fora do botão, para o dedo raspar
+       sem abrir o visor. Some sozinha quando ela raspou o bastante. -->
+  @if (foiled()) {
+    <app-scratch-foil
+      class="frame__foil"
+      (revealed)="revealed.set(true)"
+      animate.leave="foil-out"
+    />
+  }
+</div>
+
+<!-- A foto de perto. Fechado até ela tocar na moldura. -->
+<app-photo-viewer [photo]="photo()" [back]="back()" />

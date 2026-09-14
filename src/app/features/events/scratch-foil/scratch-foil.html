@@ -1,0 +1,16 @@
+<canvas #canvas class="foil" aria-hidden="true"></canvas>
+
+<span class="foil__sparks" aria-hidden="true">
+  @for (spark of sparks(); track spark.id) {
+    <i
+      class="spark spark--{{ spark.variant }}"
+      [style.left.%]="spark.x"
+      [style.top.%]="spark.y"
+      (animationend)="retireSpark(spark.id)"
+      >✦</i
+    >
+  }
+</span>
+
+<!-- Para quem não raspa com o dedo: teclado e leitor de tela. -->
+<button type="button" class="foil__skip sr-only" (click)="reveal()">Revelar a foto</button>

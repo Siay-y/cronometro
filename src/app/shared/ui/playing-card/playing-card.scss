@@ -119,9 +119,18 @@
 }
 
 .center {
+  display: grid;
+  place-items: center;
   font-size: calc(var(--card-w) * 0.46);
   line-height: 1;
   filter: drop-shadow(0 2px 6px rgba(90, 0, 45, 0.35));
+}
+
+/* O emblema desenhado ocupa a mesma mancha que o naipe ocuparia, e leva a
+   mesma tinta: é um pip da carta, não um adesivo colado em cima. */
+.center app-icon {
+  inline-size: 1.12em;
+  block-size: 1.12em;
 }
 
 .corner {

@@ -1,0 +1,114 @@
+:host {
+  display: grid;
+  justify-items: center;
+  inline-size: 100%;
+}
+
+.frame__wrap {
+  position: relative;
+  inline-size: min(300px, 82%);
+}
+
+/* Moldura de retrato em papel, a mesma família das fotos da carta. É um botão:
+   tocar nela abre o visor. */
+.frame {
+  display: grid;
+  gap: var(--sp-2);
+  inline-size: 100%;
+  padding: 10px 10px 12px;
+  border: 0;
+  font: inherit;
+  cursor: pointer;
+  background: #fffdf6;
+  border-radius: 4px;
+  rotate: -1.5deg;
+  box-shadow:
+    var(--shadow-float),
+    0 0 0 1px rgba(92, 42, 70, 0.14),
+    0 0 40px rgba(255, 45, 149, 0.18);
+  transition:
+    rotate var(--dur-3) var(--ease-spring),
+    scale var(--dur-3) var(--ease-spring),
+    box-shadow var(--dur-3) var(--ease-out);
+}
+
+.frame:hover,
+.frame:focus-visible {
+  rotate: 0deg;
+  scale: 1.03;
+  box-shadow:
+    var(--shadow-float),
+    0 0 0 1px rgba(92, 42, 70, 0.14),
+    0 0 56px rgba(255, 45, 149, 0.34);
+}
+
+.frame:focus-visible {
+  outline: 2px solid var(--c-magenta);
+  outline-offset: 6px;
+}
+
+.frame img {
+  display: block;
+  inline-size: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 2px;
+  background: #e3d6c0;
+}
+
+.frame__caption {
+  text-align: center;
+  font-family: var(--font-script);
+  font-style: italic;
+  font-size: 1.05rem;
+  color: #6b4a3a;
+}
+
+/* Com o foil por cima, a moldura não é um botão de verdade ainda. */
+.is-foiled .frame {
+  cursor: default;
+  rotate: 0deg;
+}
+
+.is-foiled .frame:hover {
+  scale: 1;
+}
+
+/* A raspadinha cobre só a foto (o recuo de 10px é o do papel), não a legenda. */
+.frame__foil {
+  position: absolute;
+  inset: 10px 10px auto;
+  aspect-ratio: 1;
+}
+
+.foil-out {
+  animation: foilOut 720ms var(--ease-out) both;
+}
+
+@keyframes foilOut {
+  0% {
+    opacity: 1;
+    filter: brightness(1);
+  }
+  40% {
+    opacity: 1;
+    filter: brightness(2.4);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.06);
+    filter: brightness(3) blur(6px);
+  }
+}
+
+.frame__peek {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--sp-1);
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--c-magenta-deep);
+}

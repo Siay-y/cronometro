@@ -10,6 +10,7 @@ import {
   input,
 } from '@angular/core';
 import { clamp } from '../../../core/utils/time.util';
+import { Icon, isIconName } from '../icon/icon';
 
 /** Inclinação máxima da carta, em graus, em cada eixo. */
 const MAX_TILT = 11;
@@ -28,6 +29,7 @@ const MAX_TILT = 11;
  */
 @Component({
   selector: 'app-playing-card',
+  imports: [Icon],
   templateUrl: './playing-card.html',
   styleUrl: './playing-card.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -42,12 +44,21 @@ export class PlayingCard {
   readonly suit = input('♠');
   readonly charge = input(0.5);
   readonly faceDown = input(false, { transform: booleanAttribute });
-  /** Emoji ou símbolo exibido no centro no lugar do naipe. */
+  /**
+   * O que vai no centro no lugar do naipe: o nome de um ícone do baralho
+   * (`joker`, `gift`...), desenhado com a tinta da carta, ou um símbolo/emoji
+   * solto, mostrado como texto.
+   */
   readonly emblem = input<string | null>(null);
   /** Desliga o efeito holográfico em cartas puramente decorativas. */
   readonly holographic = input(true, { transform: booleanAttribute });
 
   protected readonly red = computed(() => this.suit() === '♥' || this.suit() === '♦');
+  protected readonly emblemIcon = computed(() => {
+    const emblem = this.emblem();
+
+    return isIconName(emblem) ? emblem : null;
+  });
   protected readonly glow = computed(() => 0.25 + this.charge() * 0.75);
   protected readonly lift = computed(() => 1 + this.charge() * 0.06);
 

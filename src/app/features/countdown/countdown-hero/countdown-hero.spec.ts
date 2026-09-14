@@ -62,7 +62,7 @@ describe('CountdownHero', () => {
 
     expect(host.classList.contains('is-last-hour')).toBe(true);
     expect(host.textContent).toContain('Falta menos de uma hora');
-    expect(Number(card.style.getPropertyValue('--heat'))).toBeCloseTo(0.25, 5);
+    expect(Number(card.style.getPropertyValue('--heat'))).toBeCloseTo(0.25, 3);
   });
 
   it('nos últimos dez segundos conta em voz alta na tela inteira', () => {

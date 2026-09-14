@@ -57,13 +57,23 @@
   color: var(--c-text-faint);
   transition:
     color var(--dur-2) var(--ease-out),
-    background var(--dur-2) var(--ease-out),
-    transform var(--dur-2) var(--ease-spring);
+    background var(--dur-2) var(--ease-out);
+}
+
+/* Quem gira é o ✕, não o botão: o botão girando passava da borda do painel no
+   meio do giro (um quadrado a 45° é mais largo que reto) e, como o painel
+   rola, isso abria uma barra de rolagem por um instante. */
+.panel__x {
+  display: block;
+  transition: transform var(--dur-2) var(--ease-spring);
 }
 
 .panel__close:hover {
   color: var(--c-text);
   background: rgba(255, 45, 149, 0.16);
+}
+
+.panel__close:hover .panel__x {
   transform: rotate(90deg);
 }
 
@@ -90,6 +100,23 @@
 
 .panel__message p {
   animation: riseIn var(--dur-4) var(--ease-expo) both;
+}
+
+/* A foto do fim se acomoda na mesa depois do texto, como a da caixa. */
+.panel__photo {
+  margin-block-start: var(--sp-3);
+  animation: frameSettle 760ms var(--ease-spring) both;
+}
+
+@keyframes frameSettle {
+  0% {
+    opacity: 0;
+    transform: translateY(46px) scale(0.55) rotate(-4deg);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 .panel__foot {
@@ -151,6 +178,56 @@
   font-size: clamp(1.5rem, 6vw, 2.1rem);
   color: var(--c-gold);
   text-shadow: 0 0 18px rgba(246, 196, 83, 0.45);
+}
+
+/* Escrita ao vivo: o parágrafo já está no lugar quando a primeira letra sai;
+   o que anima é o cursor, piscando no fim do que está sendo escrito. */
+.is-typed p {
+  animation: none;
+  min-block-size: 1lh;
+}
+
+.is-writing::after {
+  content: '';
+  display: inline-block;
+  inline-size: 0.08em;
+  block-size: 1em;
+  margin-inline-start: 0.08em;
+  vertical-align: -0.15em;
+  background: currentcolor;
+  animation: blink 1s steps(2, end) infinite;
+}
+
+@keyframes blink {
+  to {
+    opacity: 0;
+  }
+}
+
+/* O leque: as outras cartas da mesa, pequenas, em arco atrás do Ás. O centro
+   do giro fica bem abaixo da carta, que é o que abre o leque. Cada carta só
+   aparece quando o clone dela pousa (ver `deal()`). */
+.hand {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+.hand__card {
+  --card-w: 46px;
+  --fan: calc((var(--i) - (var(--n) - 1) / 2) * 13deg);
+  position: absolute;
+  translate: 0 -26%;
+  rotate: var(--fan);
+  transform-origin: 50% 175%;
+  visibility: hidden;
+  filter: brightness(0.92);
+}
+
+.hand__card.is-landed {
+  visibility: visible;
 }
 
 /* --- Merci ------------------------------------------------------------------

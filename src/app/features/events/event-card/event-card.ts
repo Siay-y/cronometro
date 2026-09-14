@@ -41,6 +41,8 @@ const DETONATION_PULSE = 70;
   styleUrl: './event-card.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
+    /* É por aqui que o presente principal acha cada card para tirar a carta dele. */
+    '[attr.data-event-id]': 'view().event.id',
     '[class]': '"is-" + view().phase',
     '[class.accent-violet]': 'view().event.accent === "violet"',
     '[class.accent-gold]': 'view().event.accent === "gold"',

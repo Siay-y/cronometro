@@ -7,7 +7,15 @@
     <span class="corner corner--tl"
       >{{ rank() }}<i>{{ suit() }}</i></span
     >
-    <span class="center">{{ emblem() ?? suit() }}</span>
+    <!-- O emblema é um ícone do baralho quando o nome bate; senão, o texto
+         (o naipe, um símbolo ou um emoji vindo do painel). -->
+    <span class="center">
+      @if (emblemIcon(); as name) {
+        <app-icon [name]="name" />
+      } @else {
+        {{ emblem() ?? suit() }}
+      }
+    </span>
     <span class="corner corner--br"
       >{{ rank() }}<i>{{ suit() }}</i></span
     >

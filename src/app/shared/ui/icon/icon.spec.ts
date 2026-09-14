@@ -1,5 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Icon, IconName } from './icon';
+import { Icon, IconName, isIconName } from './icon';
+
+describe('isIconName', () => {
+  it('reconhece os emblemas do baralho e recusa o resto', () => {
+    expect(isIconName('gift')).toBe(true);
+    expect(isIconName('joker')).toBe(true);
+    expect(isIconName('🎁')).toBe(false);
+    expect(isIconName('♠')).toBe(false);
+    expect(isIconName('')).toBe(false);
+    expect(isIconName(null)).toBe(false);
+    // Nomes herdados de `Object` não viram ícone por acidente.
+    expect(isIconName('constructor')).toBe(false);
+  });
+});
 
 describe('Icon', () => {
   let fixture: ComponentFixture<Icon>;

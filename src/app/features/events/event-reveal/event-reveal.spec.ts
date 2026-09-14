@@ -1,7 +1,11 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { vi } from 'vitest';
 import { GiftEvent } from '../../../core/models/gift-event.model';
+import { GiftEventsStore } from '../../../core/state/gift-events.store';
 import { describeGiftEvent } from '../../../core/utils/gift-event.util';
 import { parseLocalDateTime } from '../../../core/utils/time.util';
+import { keystrokeDelay, typingDuration } from '../../../core/utils/typewriter.util';
+import { installFakeCanvas } from '../../../../testing/fake-canvas';
 import { EventReveal } from './event-reveal';
 
 const EVENT: GiftEvent = {
@@ -115,42 +119,175 @@ describe('EventReveal', () => {
     expect(hearts().length).toBe(90);
   });
 
-  describe('o presente principal', () => {
-    beforeEach(() => {
-      fixture.componentRef.setInput(
-        'view',
-        describeGiftEvent(
-          { ...EVENT, finale: true, message: 'Feliz aniversário.\n\nVem cá.' },
-          parseLocalDateTime(EVENT.opensAt) + 60_000,
-          false,
-        ),
-      );
-      fixture.detectChanges();
-    });
+  it('não põe porta-retratos nenhum num presente sem foto', () => {
+    expect(host.querySelector('app-photo-frame')).toBeNull();
+  });
 
-    it('abre dourado, com o Ás no meio do estouro de naipes', () => {
-      expect(host.classList.contains('is-finale')).toBe(true);
-      expect(host.querySelector('app-spark-burst .panel__card')).toBeTruthy();
-      expect(host.querySelector('.panel__card')?.getAttribute('aria-label')).toBe('Carta A de ♥');
-      // O estouro fica curto de propósito: o painel rola, e cortaria o resto.
-      expect(host.querySelector('app-spark-burst')?.classList.contains('is-tight')).toBe(true);
-    });
+  it('acomoda a foto do fim logo depois do último parágrafo', () => {
+    fixture.componentRef.setInput(
+      'view',
+      describeGiftEvent(
+        {
+          ...EVENT,
+          message: 'Primeiro.\n\nSegundo.\n\nTerceiro.',
+          photo: { src: '/fotos/final.jpg', alt: 'Nós', caption: 'te amo' },
+        },
+        parseLocalDateTime(EVENT.opensAt) + 60_000,
+        false,
+      ),
+    );
+    fixture.detectChanges();
 
-    it('segura a última frase para ela chegar sozinha', () => {
-      const [first, last] = [...host.querySelectorAll<HTMLElement>('.panel__message p')];
+    const frame = host.querySelector<HTMLElement>('app-photo-frame')!;
 
-      expect(first.style.animationDelay).toBe('120ms');
-      expect(first.classList.contains('is-finale-last')).toBe(false);
-      // 120 + 140, e mais a pausa de 1400.
-      expect(last.style.animationDelay).toBe('1660ms');
-      expect(last.classList.contains('is-finale-last')).toBe(true);
-      expect(last.textContent?.trim()).toBe('Vem cá.');
-    });
+    expect(frame).toBeTruthy();
+    expect(frame.previousElementSibling?.classList.contains('panel__message')).toBe(true);
+    expect(frame.querySelector('img')?.getAttribute('src')).toBe('/fotos/final.jpg');
+    expect(frame.textContent).toContain('te amo');
+    // O terceiro parágrafo entra aos 400ms; a foto, um compasso depois.
+    expect(frame.style.animationDelay).toBe('920ms');
   });
 
   it('nos outros presentes, a carta de estrela com o emblema, sem estouro', () => {
     expect(host.classList.contains('is-finale')).toBe(false);
     expect(host.querySelector('app-spark-burst')).toBeNull();
     expect(host.querySelector('.panel__card')?.getAttribute('aria-label')).toBe('Carta ★ de ♦');
+    expect(host.querySelector('.hand')).toBeNull();
+  });
+});
+
+describe('EventReveal: o presente principal', () => {
+  const FIRST = 'Feliz aniversário.';
+  const LAST = 'Vem cá.';
+  const TYPING_START_MS = 900;
+  const FINALE_PAUSE_MS = 1400;
+
+  let fixture: ComponentFixture<EventReveal>;
+  let host: HTMLElement;
+
+  beforeEach(async () => {
+    vi.useFakeTimers();
+    // Com um canvas de mentira a raspadinha fica por cima da foto; sem canvas
+    // ela se revelaria sozinha no primeiro render.
+    installFakeCanvas();
+
+    await TestBed.configureTestingModule({ imports: [EventReveal] }).compileComponents();
+    TestBed.inject(GiftEventsStore).restoreDefaults();
+
+    fixture = TestBed.createComponent(EventReveal);
+    fixture.componentRef.setInput(
+      'view',
+      describeGiftEvent(
+        {
+          ...EVENT,
+          // O mesmo id do presente principal da lista: ele não entra no leque.
+          id: 'gift-08',
+          finale: true,
+          message: `${FIRST}\n\n${LAST}`,
+          photo: { src: '/fotos/final.jpg', alt: 'Nós', caption: 'te amo', foil: true },
+        },
+        parseLocalDateTime('2026-09-15T00:06'),
+        false,
+      ),
+    );
+    fixture.detectChanges();
+    host = fixture.nativeElement as HTMLElement;
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+  });
+
+  function advance(ms: number): void {
+    vi.advanceTimersByTime(ms);
+    fixture.detectChanges();
+  }
+
+  function lines(): string[] {
+    return [...host.querySelectorAll('.panel__message p')].map((p) => p.textContent?.trim() ?? '');
+  }
+
+  it('abre dourado, com o Ás no meio do estouro de naipes', () => {
+    expect(host.classList.contains('is-finale')).toBe(true);
+    expect(host.querySelector('app-spark-burst .panel__card')).toBeTruthy();
+    expect(host.querySelector('.panel__card')?.getAttribute('aria-label')).toBe('Carta A de ♥');
+    // O estouro fica curto de propósito: o painel rola, e cortaria o resto.
+    expect(host.querySelector('app-spark-burst')?.classList.contains('is-tight')).toBe(true);
+  });
+
+  it('põe todas as outras cartas da mesa num leque atrás do Ás', () => {
+    const others = TestBed.inject(GiftEventsStore)
+      .events()
+      .filter((event) => event.id !== 'gift-08');
+    const cards = [...host.querySelectorAll<HTMLElement>('.hand__card')];
+
+    expect(cards.length).toBe(others.length);
+    expect(cards.map((card) => card.dataset['hand'])).toEqual(others.map((event) => event.id));
+    // O emblema de cada carta é o ícone do baralho dela, desenhado, não um emoji.
+    expect(cards[0].querySelector('.center app-icon svg')).toBeTruthy();
+    // Sem `animate` (o jsdom não tem), a carta já nasce pousada no leque.
+    expect(cards.every((card) => card.classList.contains('is-landed'))).toBe(true);
+  });
+
+  it('escreve a mensagem ao vivo, tecla por tecla', () => {
+    // Antes de a mão começar: o primeiro parágrafo existe, vazio, com o cursor.
+    expect(lines()).toEqual(['']);
+    expect(host.querySelector('.is-writing')).toBeTruthy();
+
+    advance(TYPING_START_MS);
+    expect(lines()).toEqual(['F']);
+
+    advance(keystrokeDelay(FIRST, 0));
+    expect(lines()).toEqual(['Fe']);
+
+    advance(typingDuration(FIRST));
+    expect(lines()[0]).toBe(FIRST);
+  });
+
+  it('segura o "Vem cá." numa pausa longa e o escreve por último', () => {
+    advance(TYPING_START_MS + typingDuration(FIRST));
+    // O primeiro parágrafo terminou; o último ainda nem apareceu.
+    expect(lines()).toEqual([FIRST]);
+    expect(host.querySelector('app-photo-frame')).toBeNull();
+
+    advance(FINALE_PAUSE_MS);
+    expect(lines()).toEqual([FIRST, 'V']);
+    expect(host.querySelector('.is-finale-last')?.classList.contains('is-writing')).toBe(true);
+
+    advance(typingDuration(LAST));
+    expect(lines()).toEqual([FIRST, LAST]);
+    // Terminou: o cursor some e a foto chega, coberta pela raspadinha.
+    expect(host.querySelector('.is-writing')).toBeNull();
+    expect(host.querySelector('app-photo-frame')).toBeTruthy();
+    expect(host.querySelector('app-photo-frame app-scratch-foil')).toBeTruthy();
+  });
+
+  it('entrega a mensagem pronta a quem pediu menos movimento', () => {
+    vi.stubGlobal('matchMedia', () => ({ matches: true }));
+    const quick = TestBed.createComponent(EventReveal);
+    quick.componentRef.setInput(
+      'view',
+      describeGiftEvent(
+        { ...EVENT, finale: true, message: `${FIRST}\n\n${LAST}` },
+        parseLocalDateTime(EVENT.opensAt) + 60_000,
+        false,
+      ),
+    );
+    quick.detectChanges();
+
+    const text = [...quick.nativeElement.querySelectorAll('.panel__message p')].map((p: Element) =>
+      p.textContent?.trim(),
+    );
+
+    expect(text).toEqual([FIRST, LAST]);
+    vi.unstubAllGlobals();
+  });
+
+  it('não deixa a máquina de escrever rodando depois de fechada', () => {
+    advance(TYPING_START_MS);
+    fixture.destroy();
+
+    expect(() => vi.advanceTimersByTime(60_000)).not.toThrow();
   });
 });

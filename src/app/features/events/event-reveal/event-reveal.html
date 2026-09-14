@@ -8,13 +8,29 @@
 >
   <button #closeButton type="button" class="panel__close" (click)="dismiss.emit()">
     <span class="sr-only">Fechar</span>
-    <span aria-hidden="true">✕</span>
+    <span class="panel__x" aria-hidden="true">✕</span>
   </button>
 
-  <!-- O presente principal abre com o Ás no meio de um estouro de naipes; os
-       outros, com a carta de estrela e o emblema deles. -->
+  <!-- O presente principal abre com o Ás no meio de um estouro de naipes, com
+       as outras cartas da mesa num leque atrás dele; os outros, com a carta de
+       estrela e o emblema deles. -->
   @if (finale()) {
     <app-spark-burst tight class="panel__burst">
+      <span class="hand" [style.--n]="hand().length" aria-hidden="true">
+        @for (card of hand(); track card.id; let i = $index) {
+          <app-playing-card
+            class="hand__card"
+            [class.is-landed]="landed().has(card.id)"
+            [style.--i]="i"
+            [attr.data-hand]="card.id"
+            rank="★"
+            suit="♦"
+            [emblem]="card.icon"
+            [charge]="0.35"
+            holographic="false"
+          />
+        }
+      </span>
       <app-playing-card class="panel__card" rank="A" suit="♥" [charge]="1" />
     </app-spark-burst>
   } @else {
@@ -24,16 +40,32 @@
   <p class="eyebrow">{{ view().opensAtMs | schedule: 'long' }}</p>
   <h2 class="panel__title kinetic-text">{{ event().title }}</h2>
 
-  <div class="panel__message">
+  <div class="panel__message" [class.is-typed]="finale()">
     @for (paragraph of paragraphs(); track $index) {
-      <p
-        [class.is-finale-last]="finale() && $last"
-        [style.animation-delay.ms]="delayFor($index, $last)"
-      >
-        {{ paragraph }}
-      </p>
+      @if (finale()) {
+        <!-- Escrita ao vivo: cada parágrafo só existe quando a mão chega nele. -->
+        @if ($index <= cursor().paragraph) {
+          <p [class.is-finale-last]="$last" [class.is-writing]="writing($index)">
+            {{ typed($index) }}
+          </p>
+        }
+      } @else {
+        <p [style.animation-delay.ms]="delayFor($index)">{{ paragraph }}</p>
+      }
     }
   </div>
+
+  <!-- A foto do fim da mensagem chega depois que o último parágrafo assentou
+       (no finale, depois que a mão terminou de escrever). -->
+  @if (event().photo; as photo) {
+    @if (!finale() || typingDone()) {
+      <app-photo-frame
+        class="panel__photo"
+        [photo]="photo"
+        [style.animation-delay.ms]="photoDelay()"
+      />
+    }
+  }
 
   @if (event().letter; as letter) {
     <app-letter-envelope [letter]="letter" [letterId]="event().id" />

@@ -11,13 +11,21 @@ import { GiftEvent } from '../core/models/gift-event.model';
  *                      "lembrança": continua acessível, só sai dos holofotes.
  *                      (1 dia = 1440, 2 dias = 2880.)
  *  • `accent`          'magenta' | 'violet' | 'gold'.
+ *  • `icon`            o emblema no centro da carta: o nome de um ícone do
+ *                      baralho (`joker`, `gamepad`, `joystick`, `bag`, `letter`,
+ *                      `ribbon`, `gift`, `spade`), desenhado com a tinta da
+ *                      carta, ou um símbolo/emoji solto, mostrado como texto.
  *  • `letter`          opcional. Quando existe, a revelação ganha um envelope
  *                      lacrado: ela aperta o botão, o lacre estala, a aba
  *                      levanta e o papel sai de dentro. É onde vão os textos
  *                      longos, que não caberiam no `message`.
- *  • `finale`          opcional, `true` só no presente principal: a revelação
- *                      abre com estouro de naipes, painel dourado e a última
- *                      frase chegando sozinha, depois de uma pausa.
+ *  • `photo`           opcional. Uma foto num porta-retratos de papel logo
+ *                      depois do último parágrafo; tocar nela abre de perto.
+ *                      Com `foil: true`, vem coberta por uma raspadinha.
+ *  • `finale`          opcional, `true` só no presente principal: painel
+ *                      dourado, o Ás no estouro de naipes, as outras cartas
+ *                      voando dos cards para um leque atrás dele, e a mensagem
+ *                      se escrevendo ao vivo, com o "Vem cá." por último.
  *
  *  Dica: dá para montar tudo pelo painel (5 toques no naipe do rodapé) e usar
  *  o botão "Copiar como código" para colar a lista pronta aqui.
@@ -29,7 +37,7 @@ export const GIFT_EVENTS: readonly GiftEvent[] = [
     teaser: 'Tudo começa com uma carta virada para baixo.',
     message:
       'Toda boa história do Gambit começa com uma carta na mão.\n\nEsta aqui é a minha: durante as próximas duas semanas, vai aparecer um presente novo neste site de tempos em tempos. Nenhum deles abre antes da hora, nem se você insistir.\n\nEntão volta aqui, tá? Eu prometo que vale a pena :>',
-    icon: '🃏',
+    icon: 'joker',
     accent: 'magenta',
     opensAt: '2026-09-02T20:00',
     durationMinutes: 2880,
@@ -40,7 +48,7 @@ export const GIFT_EVENTS: readonly GiftEvent[] = [
     teaser: 'Presentinho novo te esperando no Rivals.',
     message:
       'Vamos jogar com as skins novas mon amour. \n\nCom certeza que você vai querer a do Gambit também, mas por enquanto é só o da Rogue. Espero muito que gosto do seu presentinho.',
-    icon: '🎮',
+    icon: 'gamepad',
     accent: 'violet',
     opensAt: '2026-09-03T21:00',
     durationMinutes: 2880,
@@ -51,7 +59,7 @@ export const GIFT_EVENTS: readonly GiftEvent[] = [
     teaser: 'Abre a sua Steam, mon amour.',
     message:
       'Abre a Steam. Tem um presente lá, esperando você aceitar.\n\nNotei que esse joguinho estava na sua lista de desejos, e tenho certeza que ele vai representar uma fração do nosso amor :>\n\nAceita, instala e joga hoje. Eu quero ficar do seu lado te assistindo jogar, que é uma coisa que eu gosto de fazer mais do que você imagina.\n\nGambit ainda tem várias cartinhas para ti mon Cher. Ainda tem muitas cartas na manga.',
-    icon: '🕹️',
+    icon: 'joystick',
     accent: 'magenta',
     opensAt: '2026-09-06T10:30',
     durationMinutes: 2880,
@@ -62,7 +70,7 @@ export const GIFT_EVENTS: readonly GiftEvent[] = [
     teaser: 'Você escolhe o lugar. Eu vou junto.',
     message:
       'Essa carta não tem lugar marcado. Quem escolhe é você ma Cher.\n\nVocê comentou daqueles produtinhos de cuidado pessoal que estava querendo, e eu guardei comigo desde então. Então é simples: a gente vai onde você quiser, e você leva o que você quiser.\n\nSem eu ficar perguntando se precisa mesmo. Você cuidando de você é uma das coisas que eu mais gosto de ver.\n\nVamos? Eu vou junto pra carregar as sacolas :>',
-    icon: '🛍️',
+    icon: 'bag',
     accent: 'violet',
     opensAt: '2026-09-08T19:00',
     durationMinutes: 2880,
@@ -73,7 +81,7 @@ export const GIFT_EVENTS: readonly GiftEvent[] = [
     teaser: 'Fechada com cera. Só você pode quebrar o lacre.',
     message:
       'Espero muito que goste desse presentinho, Mon Cher.\n\nEscrevi essa cartinha pensando em cada palavra, quero que se sinta abraça e muito amada por mim nesse momento :>.\n\nEssa cartinha fica guardada aqui, então você pode voltar e abrir de novo sempre que quiser.',
-    icon: '💌',
+    icon: 'letter',
     accent: 'magenta',
     opensAt: '2026-09-10T18:30',
     durationMinutes: 2880,
@@ -112,7 +120,7 @@ export const GIFT_EVENTS: readonly GiftEvent[] = [
     teaser: 'Tem uma caixa dentro desta carta. E um segredo dentro da caixa.',
     message:
       'Hoje o presente vem embrulhado, Mon Cher.\n\nTem um segredinho guardado aí dentro...\n\nDepois me conta se você gostou :>',
-    icon: '🎀',
+    icon: 'ribbon',
     accent: 'gold',
     opensAt: '2026-09-12T14:23',
     durationMinutes: 2880,
@@ -149,12 +157,20 @@ export const GIFT_EVENTS: readonly GiftEvent[] = [
     teaser: 'Aquele que eu venho segurando desde o começo.',
     message:
       'Feliz aniversário, Mon Cher.\n\nEste é o presente que eu venho guardando desde o primeiro card deste site, e que eu prefiro te entregar pessoalmente, olhando no seu rostinho, eu te amo muito.\n\nVem cá.',
-    icon: '🎁',
+    icon: 'gift',
     accent: 'gold',
     opensAt: '2026-09-15T00:05',
     durationMinutes: 2880,
     // O único que abre com estouro de naipes, painel dourado e o "Vem cá."
     // chegando sozinho no fim.
     finale: true,
+    // A foto que chega logo depois do "Vem cá.", num porta-retratos, coberta
+    // por uma raspadinha: ela raspa com o dedo para revelar.
+    photo: {
+      src: '/fotos/imagem-final-1.jpg',
+      alt: 'Uma foto nossa',
+      caption: 'te amo, Mon Cher',
+      foil: true,
+    },
   },
 ];

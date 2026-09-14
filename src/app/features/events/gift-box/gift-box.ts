@@ -6,12 +6,11 @@ import {
   inject,
   input,
   signal,
-  viewChild,
 } from '@angular/core';
 import { SealedGift } from '../../../core/models/gift-event.model';
 import { vibrate } from '../../../core/utils/haptics.util';
 import { Icon } from '../../../shared/ui/icon/icon';
-import { PhotoViewer } from '../photo-viewer/photo-viewer';
+import { PhotoFrame } from '../photo-frame/photo-frame';
 
 /** Dedo na caixa até ela não aguentar mais. O mesmo ritual do resto do site. */
 const CHARGE_MS = 1200;
@@ -36,12 +35,12 @@ type BoxPhase = 'closed' | 'charging' | 'opening' | 'open';
  *
  * Soltar antes da hora acalma a caixa e nada acontece.
  *
- * Tocar na foto aberta abre o `PhotoViewer`: o retrato de perto, que inclina
- * e vira para mostrar o que está escrito atrás.
+ * A foto aberta é um `PhotoFrame`: tocar nela abre o retrato de perto, que
+ * inclina e vira para mostrar o que está escrito atrás.
  */
 @Component({
   selector: 'app-gift-box',
-  imports: [Icon, PhotoViewer],
+  imports: [Icon, PhotoFrame],
   templateUrl: './gift-box.html',
   styleUrl: './gift-box.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -67,13 +66,6 @@ export class GiftBox {
 
   protected readonly inkDelay = INK_DELAY_MS;
   protected readonly inkStep = INK_STEP_MS;
-
-  /** O visor da foto de perto. Só existe depois que a caixa abriu. */
-  private readonly viewer = viewChild(PhotoViewer);
-
-  protected view(): void {
-    this.viewer()?.open();
-  }
 
   private timers: ReturnType<typeof setTimeout>[] = [];
   /** Marca que o dedo já cuidou desta interação, para o clique não repetir. */
@@ -115,7 +107,10 @@ export class GiftBox {
     this.clearTimers();
 
     // Quem pediu menos movimento recebe a foto já fora da caixa.
-    if (typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
+    if (
+      typeof window !== 'undefined' &&
+      window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+    ) {
       this.phase.set('open');
       return;
     }

@@ -55,6 +55,27 @@ describe('PlayingCard', () => {
     expect(host.style.getPropertyValue('--tilt-y')).toBe('0deg');
   });
 
+  it('mostra o naipe no centro quando não tem emblema', () => {
+    expect(host.querySelector('.center')?.textContent?.trim()).toBe('♠');
+    expect(host.querySelector('.center app-icon')).toBeNull();
+  });
+
+  it('desenha o emblema como ícone quando o nome é do baralho', () => {
+    fixture.componentRef.setInput('emblem', 'gift');
+    fixture.detectChanges();
+
+    expect(host.querySelector('.center app-icon svg path')).toBeTruthy();
+    expect(host.querySelector('.center')?.textContent?.trim()).toBe('');
+  });
+
+  it('mostra um símbolo solto como texto, do jeito que veio', () => {
+    fixture.componentRef.setInput('emblem', '🎂');
+    fixture.detectChanges();
+
+    expect(host.querySelector('.center app-icon')).toBeNull();
+    expect(host.querySelector('.center')?.textContent?.trim()).toBe('🎂');
+  });
+
   it('ignora coordenadas inválidas em vez de escrever NaN no estilo', () => {
     fixture.componentInstance.tiltTo(Number.NaN, Number.NaN);
 
