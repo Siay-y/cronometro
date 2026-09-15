@@ -11,9 +11,7 @@ export type IconName =
   | 'ribbon'
   | 'gift'
   | 'spade'
-  | 'cards'
-  | 'card-plus'
-  | 'palm';
+  | 'coins';
 
 interface IconShape {
   readonly paths: readonly string[];
@@ -111,29 +109,13 @@ const ICONS: Record<IconName, IconShape> = {
     ],
     solid: true,
   },
-  /* As fichas da mesa de vinte e um: dar as cartas (um par em leque)... */
-  cards: {
+  /* Duas fichas, uma sobre a outra: o emblema da carta de dobrar a aposta. */
+  coins: {
     paths: [
-      'M9.2 7.6h7.2a1.7 1.7 0 0 1 1.7 1.7v10.4a1.7 1.7 0 0 1-1.7 1.7H9.2a1.7 1.7 0 0 1-1.7-1.7V9.3a1.7 1.7 0 0 1 1.7-1.7Z',
-      'M8.4 7.6 9.3 4.2l8.4 2.2-1.2 4.6',
-      'M12.8 12.2a1.6 1.6 0 1 1 0 3.2 1.6 1.6 0 0 1 0-3.2Z',
-    ],
-  },
-  /* ...pedir mais uma (uma carta com o mais)... */
-  'card-plus': {
-    paths: [
-      'M8.4 3.6h7.2a1.7 1.7 0 0 1 1.7 1.7v13.4a1.7 1.7 0 0 1-1.7 1.7H8.4a1.7 1.7 0 0 1-1.7-1.7V5.3a1.7 1.7 0 0 1 1.7-1.7Z',
-      'M12 9v6',
-      'M9 12h6',
-    ],
-  },
-  /* ...e parar (a mão aberta). */
-  palm: {
-    paths: [
-      'M7.6 12.4V7.6a1.3 1.3 0 0 1 2.6 0v4.2',
-      'M10.2 11.8V5.7a1.3 1.3 0 0 1 2.6 0v6.1',
-      'M12.8 11.8V6.7a1.3 1.3 0 0 1 2.6 0v5.5',
-      'M15.4 12.2V8.5a1.3 1.3 0 0 1 2.6 0v6.1c0 3.6-2.5 6.3-6 6.3-2.7 0-4.2-1.2-5.6-3.3l-2-3.1a1.3 1.3 0 0 1 2.1-1.5l1.1 1.4',
+      /* A ficha de trás: só o arco que a da frente não cobre. */
+      'M15 9a5.5 5.5 0 1 0-6 6',
+      'M14.5 9a5.5 5.5 0 1 1 0 11 5.5 5.5 0 0 1 0-11Z',
+      'M14.5 12.4a2.1 2.1 0 1 1 0 4.2 2.1 2.1 0 0 1 0-4.2Z',
     ],
   },
 };

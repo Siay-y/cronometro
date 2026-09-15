@@ -31,37 +31,80 @@
 
 /* --- O feltro ----------------------------------------------------------------
    Quase nada: um véu translúcido sobre o fundo da página, com um fio de luz
-   muito fino na borda. O fundo da casa continua aparecendo por trás. Quando a
-   mão termina, o fio muda de cor, e só ele.
+   muito fino na borda. O fundo da casa continua aparecendo por trás. `--accent`
+   é a cor de quem está por cima (magenta na vez dela, ouro quando ela leva,
+   violeta quando ele leva) e só o fio e os valores vestem essa cor.
    ---------------------------------------------------------------------------- */
 
 .felt {
-  --hand-card: clamp(54px, 15vw, 76px);
-  --felt-line: var(--c-hairline);
+  --accent: var(--c-magenta);
+  --hand-card: clamp(56px, 16vw, 80px);
 
   position: relative;
   display: grid;
   gap: var(--sp-4);
   inline-size: min(100%, 520px);
-  padding: var(--sp-5) var(--sp-4) var(--sp-5);
+  padding: var(--sp-5) var(--sp-4);
+  overflow: hidden;
   border-radius: var(--r-xl);
-  border: 1px solid var(--felt-line);
+  border: 1px solid var(--c-hairline);
   background: radial-gradient(120% 90% at 50% 0%, rgba(255, 255, 255, 0.045), transparent 70%);
   backdrop-filter: blur(6px);
   transition: border-color var(--dur-4) var(--ease-out);
 }
 
 .felt--her {
-  --felt-line: rgba(246, 196, 83, 0.4);
+  --accent: var(--c-gold);
 }
 
 .felt--gambit {
-  --felt-line: rgba(139, 92, 246, 0.4);
+  --accent: var(--c-violet);
 }
 
+/* No fim da mão (e com a série fechada) o fio veste a cor de quem levou. */
+.felt.is-over,
+.felt.is-closed {
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+}
+
+/* Um sopro da cor de quem levou, só quando a série fecha. */
+.felt__aura {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    90% 60% at 50% 0%,
+    color-mix(in srgb, var(--accent) 22%, transparent),
+    transparent 70%
+  );
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dur-4) var(--ease-out);
+}
+
+.felt.is-closed .felt__aura {
+  opacity: 1;
+}
+
+/* --- O placar ------------------------------------------------------------- */
+
 .tally {
+  position: relative;
+  display: grid;
+  gap: var(--sp-1);
+  justify-items: center;
+}
+
+/* O estouro de naipes quando ela fecha a série, centrado no placar. O que
+   passa do feltro é cortado por ele. */
+.tally__burst {
+  position: absolute;
+  inset: -120px -10%;
+  pointer-events: none;
+}
+
+.tally__score {
+  position: relative;
   display: flex;
-  justify-content: center;
   gap: var(--sp-3);
   font-family: var(--font-display);
   font-size: 0.9rem;
@@ -70,12 +113,31 @@
   color: var(--c-text-faint);
 }
 
-.tally strong {
+.tally__score strong {
   color: var(--c-magenta-soft);
+  transition: color var(--dur-4) var(--ease-out);
 }
 
 .tally__x {
   color: var(--c-hairline-strong);
+}
+
+.tally__goal {
+  position: relative;
+  font-family: var(--font-script);
+  font-style: italic;
+  font-size: 0.86rem;
+  color: var(--c-text-faint);
+}
+
+/* Série fechada: os pontos crescem e vestem a cor de quem levou. */
+.is-closed .tally__score {
+  font-size: 1.1rem;
+}
+
+.is-closed .tally__score strong,
+.is-closed .tally__goal {
+  color: var(--accent);
 }
 
 /* --- Os assentos ---------------------------------------------------------- */
@@ -97,6 +159,18 @@
   color: var(--c-text-faint);
 }
 
+.seat__suit {
+  font-family: var(--font-script);
+  font-size: 1.1em;
+  letter-spacing: 0;
+  color: var(--c-hairline-strong);
+}
+
+.seat--her .seat__suit {
+  color: var(--c-ember);
+  opacity: 0.7;
+}
+
 .seat__value {
   min-inline-size: 2.2em;
   padding: 1px 8px;
@@ -104,6 +178,16 @@
   border: 1px solid var(--c-hairline-strong);
   color: var(--c-text);
   letter-spacing: 0.08em;
+  transition:
+    border-color var(--dur-3) var(--ease-out),
+    color var(--dur-3) var(--ease-out);
+}
+
+/* No fim da mão, o valor de quem levou veste a cor da mesa. */
+.felt--her.is-over .seat--her .seat__value,
+.felt--gambit.is-over .seat--gambit .seat__value {
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 .seat__value.is-bust {
@@ -111,22 +195,57 @@
   color: var(--c-ember);
 }
 
+/* A mão dobrada: a etiqueta "vale 2" ao lado do valor dela, no mesmo traço
+   fino do valor, só que na tinta cinética. */
+.stake {
+  padding: 1px 8px;
+  border-radius: var(--r-pill);
+  border: 1px solid rgba(232, 121, 249, 0.55);
+  color: var(--c-kinetic);
+  font-size: 0.72em;
+  letter-spacing: 0.14em;
+}
+
+/* --- As mãos ----------------------------------------------------------------
+   As cartas abrem em leque, como numa mão segurada: cada encaixe gira um pouco
+   a partir de um ponto bem abaixo da mesa, e o leque se reabre a cada carta
+   que chega. O giro fica no encaixe, e não na carta: a animação de entrada
+   mexe no `transform` da carta, e a carta escondida gira no eixo Y dela.
+   ---------------------------------------------------------------------------- */
+
 .hand {
   display: flex;
   justify-content: center;
   /* Sem carta ainda, o lugar dela já fica reservado: a mesa não pula. */
   min-block-size: calc(var(--hand-card) * 1.4);
+  padding-block-end: var(--sp-1);
   /* Dá profundidade à virada da carta escondida. */
   perspective: 900px;
+}
+
+.slot {
+  display: block;
+  rotate: calc((var(--i, 0) - (var(--n, 1) - 1) / 2) * 5deg);
+  transform-origin: 50% 190%;
+  transition: rotate var(--dur-4) var(--ease-spring);
+}
+
+.slot + .slot {
+  margin-inline-start: calc(var(--hand-card) * -0.3);
 }
 
 .hand__card {
   --card-w: var(--hand-card);
 }
 
-/* As cartas se sobrepõem um pouco, como numa mão de verdade. */
-.hand > * + * {
-  margin-inline-start: calc(var(--hand-card) * -0.28);
+/* Ela estourou: as cartas dela esfriam e caem um pouco. */
+.felt--gambit.is-over .seat--her .slot {
+  filter: saturate(0.6) brightness(0.8);
+  translate: 0 4px;
+  transition:
+    rotate var(--dur-4) var(--ease-spring),
+    filter var(--dur-4) var(--ease-out),
+    translate var(--dur-4) var(--ease-out);
 }
 
 /* --- A carta escondida ---------------------------------------------------
@@ -169,8 +288,25 @@
 
 .voice-slot {
   display: grid;
-  min-block-size: 3.4em;
+  gap: var(--sp-1);
+  min-block-size: 3.6em;
   align-content: center;
+}
+
+/* A palavra do resultado, na letra do título: dela em ouro, dele apagada. */
+.verdict {
+  font-family: var(--font-display);
+  font-size: clamp(1.3rem, 5.5vw, 1.7rem);
+  letter-spacing: 0.06em;
+  color: var(--c-text-muted);
+}
+
+.verdict--her {
+  background: linear-gradient(135deg, var(--c-gold), #fff1c2 50%, var(--c-gold));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 12px rgba(246, 196, 83, 0.35));
 }
 
 .voice {
@@ -181,103 +317,277 @@
   animation: riseIn var(--dur-3) var(--ease-out) both;
 }
 
-/* --- As fichas --------------------------------------------------------------
-   Discretas: um fio de luz em volta, o fundo quase transparente, o ícone e o
-   rótulo na cor do texto. A cor de cada aposta (magenta em "Mais uma",
-   dourado em "Parar") aparece só no fio, e sobe um pouco ao toque. Cada uma
-   diz em letra miúda o que vai acontecer se ela apertar. Enquanto ele joga,
-   as duas ficam na mesa, apagadas: a mesa não muda de forma no meio da mão.
+/* As aspas francesas, como em toda fala dele na casa. */
+.voice::before {
+  content: '« ';
+}
+
+.voice::after {
+  content: ' »';
+}
+
+/* --- As jogadas --------------------------------------------------------------
+   Nada de botão de formulário: as jogadas são as coisas que ficam numa mesa de
+   carteado. O monte (puxar), o lacre de cera (fechar a mão) e a carta carregada
+   (dobrar), cada uma com o nome embaixo e, em letra miúda, o que vai acontecer.
+   Enquanto ele joga, as três ficam na mesa, apagadas: a mesa não muda de forma
+   no meio da mão.
    ---------------------------------------------------------------------------- */
 
 .actions {
   display: grid;
+  justify-items: center;
+  gap: var(--sp-2);
+  padding-block-start: var(--sp-2);
+}
+
+.actions.is-play {
   grid-auto-flow: column;
   grid-auto-columns: 1fr;
+  align-items: start;
   gap: var(--sp-3);
-  inline-size: min(100%, 360px);
+  inline-size: min(100%, 400px);
   margin-inline: auto;
 }
 
-.chip {
-  --ink: var(--c-magenta-soft);
-  --ring: rgba(255, 45, 149, 0.3);
-  --ring-hot: rgba(255, 45, 149, 0.6);
+.play {
+  --object: 60px;
 
   display: grid;
   justify-items: center;
-  align-content: center;
-  gap: 3px;
-  min-block-size: 62px;
-  padding: var(--sp-2) var(--sp-3);
+  gap: var(--sp-1);
+  inline-size: 100%;
+  padding: var(--sp-2) var(--sp-1);
   border-radius: var(--r-lg);
-  border: 1px solid var(--ring);
-  background: rgba(255, 255, 255, 0.03);
-  color: var(--c-text);
-  transition:
-    transform var(--dur-2) var(--ease-spring),
-    border-color var(--dur-2) var(--ease-out),
-    background-color var(--dur-2) var(--ease-out),
-    box-shadow var(--dur-2) var(--ease-out),
-    opacity var(--dur-3) var(--ease-out);
+  transition: opacity var(--dur-3) var(--ease-out);
 }
 
-.chip__label {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--sp-2);
+/* O objeto de cada jogada ocupa a mesma altura, então os nomes se alinham. */
+.play__object {
+  display: grid;
+  place-items: center;
+  block-size: calc(var(--object) * 1.55);
+  margin-block-end: var(--sp-1);
+  transition: transform var(--dur-3) var(--ease-spring);
+}
+
+.play__label {
   font-family: var(--font-display);
-  font-size: 0.95rem;
+  font-size: 0.86rem;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  line-height: 1;
+  color: var(--c-text);
 }
 
-.chip__label app-icon {
-  inline-size: 1.25em;
-  block-size: 1.25em;
-  color: var(--ink);
-}
-
-.chip__hint {
+.play__hint {
   font-family: var(--font-script);
   font-style: italic;
-  font-size: 0.86rem;
+  font-size: 0.84rem;
   line-height: 1.2;
   color: var(--c-text-faint);
+  text-wrap: balance;
 }
 
-.chip--stand {
-  --ink: var(--c-gold);
-  --ring: rgba(246, 196, 83, 0.32);
-  --ring-hot: rgba(246, 196, 83, 0.65);
+.play:focus-visible {
+  outline: 2px solid var(--c-magenta);
+  outline-offset: 2px;
 }
 
-/* A de abrir a mão fica sozinha, no centro, do mesmo tamanho das outras. */
-.chip--deal {
-  grid-column: 1 / -1;
-  inline-size: min(100%, 240px);
-  margin-inline: auto;
-}
-
-.chip:hover:not(:disabled) {
-  transform: translateY(-2px);
-  border-color: var(--ring-hot);
-  background-color: rgba(255, 255, 255, 0.06);
-  box-shadow: 0 0 18px color-mix(in srgb, var(--ring-hot) 45%, transparent);
-}
-
-.chip:active:not(:disabled) {
-  transform: translateY(0) scale(0.97);
-  box-shadow: none;
-}
-
-.chip:focus-visible {
-  outline: 2px solid var(--ink);
-  outline-offset: 3px;
-}
-
-/* Não é a vez dela: a ficha esfria, mas não sai da mesa. */
-.chip:disabled {
-  opacity: 0.35;
+/* Não é a vez dela: a jogada esfria, mas não sai da mesa. */
+.play:disabled {
+  opacity: 0.32;
   cursor: default;
+}
+
+/* O monte: três cartas viradas, as de baixo um pouco tortas. Ao toque, a de
+   cima se solta do monte, como quem já vai puxar. */
+.deck {
+  position: relative;
+}
+
+.deck__card {
+  --card-w: var(--object);
+
+  grid-area: 1 / 1;
+  transition: translate var(--dur-3) var(--ease-spring);
+}
+
+.deck__card:nth-child(1) {
+  translate: -5px 4px;
+  rotate: -5deg;
+}
+
+.deck__card:nth-child(2) {
+  translate: 2px 2px;
+  rotate: 3deg;
+}
+
+.play--hit:hover:not(:disabled) .deck__card--top,
+.play--hit:focus-visible .deck__card--top {
+  translate: 0 -8px;
+}
+
+.play--hit:active:not(:disabled) .deck__card--top {
+  translate: 0 -2px;
+}
+
+/* O lacre: o mesmo disco de cera das cartas dele. Parar é carimbar a mão. */
+.seal {
+  inline-size: calc(var(--object) * 0.92);
+  aspect-ratio: 1;
+  font-size: 1.5rem;
+  box-shadow:
+    0 6px 16px rgba(80, 10, 45, 0.5),
+    inset 0 -2px 6px rgba(0, 0, 0, 0.25);
+  transition:
+    transform var(--dur-3) var(--ease-spring),
+    box-shadow var(--dur-3) var(--ease-out);
+}
+
+.play--stand:hover:not(:disabled) .seal,
+.play--stand:focus-visible .seal {
+  transform: translateY(-4px) rotate(-8deg);
+  box-shadow:
+    0 10px 22px rgba(80, 10, 45, 0.55),
+    var(--glow-md);
+}
+
+.play--stand:active:not(:disabled) .seal {
+  transform: scale(0.9);
+}
+
+/* A carta carregada: a energia dele já está nela, e a ficha "2♠" diz quanto. */
+.charged {
+  --card-w: var(--object);
+  /* A energia dele, além da aura da carta: o brilho magenta em volta. */
+  filter: drop-shadow(0 0 12px rgba(255, 45, 149, 0.55));
+  transition:
+    transform var(--dur-3) var(--ease-spring),
+    filter var(--dur-3) var(--ease-out);
+}
+
+.play--double:hover:not(:disabled) .charged,
+.play--double:focus-visible .charged {
+  transform: translateY(-6px) rotate(6deg);
+}
+
+.play--double:active:not(:disabled) .charged {
+  transform: scale(0.95);
+}
+
+/* Fora da vez, a carta carregada apaga a aura, e não só a opacidade. */
+.play--double:disabled .charged {
+  filter: saturate(0.4);
+}
+
+/* --- A carta-botão de abrir a mão ------------------------------------------
+   A mesma carta que abre a carta dele: os dois piques nas pontas, a moldura
+   interna que se desenha sozinha ao chegar e a faixa de foil ao toque. -------- */
+
+.deal {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--sp-3);
+  inline-size: 232px;
+  block-size: 56px;
+  padding-inline: var(--sp-4);
+  overflow: hidden;
+  border-radius: 9px;
+  border: 1px solid var(--c-hairline-strong);
+  background: linear-gradient(158deg, var(--c-surface-2), var(--c-abyss) 70%);
+  box-shadow:
+    0 12px 28px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  transition:
+    transform var(--dur-3) var(--ease-spring),
+    box-shadow var(--dur-3) var(--ease-out);
+}
+
+.deal .play__label {
+  font-size: 0.95rem;
+  letter-spacing: 0.18em;
+}
+
+.deal__pip {
+  font-family: var(--font-script);
+  font-size: 1.1rem;
+  line-height: 1;
+  color: var(--c-magenta);
+  text-shadow: 0 0 12px rgba(255, 45, 149, 0.7);
+}
+
+.deal__pip--flip {
+  rotate: 180deg;
+}
+
+.deal__frame {
+  position: absolute;
+  inset: 0;
+  fill: none;
+  pointer-events: none;
+}
+
+.deal__track {
+  stroke: rgba(255, 45, 149, 0.14);
+  stroke-width: 1;
+}
+
+.deal__draw {
+  stroke: var(--c-magenta);
+  stroke-width: 1.2;
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  filter: drop-shadow(0 0 3px rgba(255, 45, 149, 0.6));
+  animation: frameDraw 900ms var(--ease-out) 300ms both;
+}
+
+@keyframes frameDraw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.deal__sheen {
+  position: absolute;
+  inset-block: -40%;
+  inline-size: 34%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.45), transparent);
+  mix-blend-mode: overlay;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.deal:hover,
+.deal:focus-visible {
+  transform: translateY(-3px);
+  border-color: var(--c-magenta);
+  box-shadow:
+    0 18px 34px rgba(0, 0, 0, 0.55),
+    var(--glow-md);
+}
+
+.deal:hover .deal__sheen,
+.deal:focus-visible .deal__sheen {
+  opacity: 1;
+  animation: shimmerSweep 1.5s var(--ease-in-out) infinite;
+}
+
+.deal:active {
+  transform: translateY(0) scale(0.98);
+}
+
+@media (min-width: 720px) {
+  .felt {
+    padding: var(--sp-6) var(--sp-5);
+  }
+
+  .slot + .slot {
+    margin-inline-start: calc(var(--hand-card) * -0.24);
+  }
+
+  .play {
+    --object: 68px;
+  }
 }

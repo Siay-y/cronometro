@@ -1,4 +1,4 @@
-import { Verdict } from '../core/utils/blackjack.util';
+import { Outcome, Verdict } from '../core/utils/blackjack.util';
 
 /**
  * =============================================================================
@@ -22,10 +22,14 @@ export interface BlackjackLines {
   readonly hit: readonly string[];
   /** Ela parou; ele vira a carta escondida. */
   readonly stand: readonly string[];
+  /** Ela dobrou: a mão passa a valer dois pontos, e ela recebe uma carta só. */
+  readonly double: readonly string[];
   /** Ele puxa uma carta. */
   readonly draw: readonly string[];
   /** Como a mão terminou. */
   readonly verdict: Readonly<Record<Verdict, readonly string[]>>;
+  /** Alguém chegou aos doze pontos: a série acabou. */
+  readonly match: Readonly<Record<Outcome, readonly string[]>>;
 }
 
 export const BLACKJACK_LINES: BlackjackLines = {
@@ -54,6 +58,11 @@ export const BLACKJACK_LINES: BlackjackLines = {
     'Certo. Vamos ver o que eu escondi.',
     'Segurou a mão. Agora eu mostro a minha.',
   ],
+  double: [
+    'Dobrou? Uma carta só, e ela decide tudo. Gosto de quem joga assim.',
+    'Vale dois agora, chère. Lá vai a sua carta, e depois é comigo.',
+    'Dobrando a aposta contra o Gambit... corajosa. Uma carta, e a mão é minha de jogar.',
+  ],
   draw: ['Eu puxo mais uma.', 'Preciso de carta.', 'Só mais uma para mim.'],
   verdict: {
     'her-blackjack': [
@@ -75,5 +84,15 @@ export const BLACKJACK_LINES: BlackjackLines = {
       'Ganhei essa, mon amour. Deixa eu aproveitar, que é raro.',
     ],
     push: ['Empate. Leva, é sua.', 'Deu igual. Entre a gente, igual é seu.'],
+  },
+  match: {
+    her: [
+      'Doze. A mesa é sua, mon amour. Sempre foi.',
+      'Doze pontos. Eu entrego o baralho, o casaco e o resto.',
+    ],
+    gambit: [
+      'Doze para mim? Isso não vai ficar assim. Série nova, e eu jogo pior, prometo.',
+      'Fechei a série. Não conta para ninguém, chère: quero a revanche.',
+    ],
   },
 };

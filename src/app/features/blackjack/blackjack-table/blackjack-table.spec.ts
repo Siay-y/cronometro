@@ -43,20 +43,20 @@ describe('BlackjackTable', () => {
     fixture.detectChanges();
   }
 
-  /** A ficha com esse rótulo, acesa (a vez dela) ou não. */
+  /** A jogada com esse rótulo, acesa (a vez dela) ou não. */
   function button(label: string): HTMLButtonElement | null {
     return (
       [...host.querySelectorAll<HTMLButtonElement>('.actions button')].find(
-        (item) => item.querySelector('.chip__label')?.textContent?.trim() === label,
+        (item) => item.querySelector('.play__label')?.textContent?.trim() === label,
       ) ?? null
     );
   }
 
   function hint(label: string): string {
-    return button(label)?.querySelector('.chip__hint')?.textContent?.trim() ?? '';
+    return button(label)?.querySelector('.play__hint')?.textContent?.trim() ?? '';
   }
 
-  /** As fichas de pedir e parar estão na mesa, mas apagadas. */
+  /** As jogadas de pedir e parar estão na mesa, mas apagadas. */
   function chipsCold(): boolean {
     const chips = [button('Mais uma'), button('Parar')];
     return chips.every((chip) => chip?.disabled === true);
@@ -193,6 +193,59 @@ describe('BlackjackTable', () => {
 
     expect(saved.her + saved.gambit).toBe(1);
     expect(host.querySelector('.tally')?.textContent).toContain('1');
+  });
+
+  it('dobrar vale dois pontos: uma carta só, e a vez passa para ele', () => {
+    dealHand();
+    expect(button('Dobrar')?.disabled).toBe(false);
+
+    button('Dobrar')!.click();
+    fixture.detectChanges();
+
+    // A vez dela fechou na hora; a carta ainda vai cair.
+    expect(voice()).toBe(pick(BLACKJACK_LINES.double));
+    expect(chipsCold()).toBe(true);
+    expect(host.querySelector('.stake')?.textContent?.trim()).toBe('vale 2');
+
+    // Vinte mais o 9♣: estourou, e a mão dobrada custa dois.
+    advance(DEAL_STEP_MS);
+    expect(cards('her')).toBe(3);
+    expect(voice()).toBe(pick(BLACKJACK_LINES.verdict['her-bust']));
+    expect(JSON.parse(localStorage.getItem(TALLY_KEY)!)).toEqual({ her: 0, gambit: 2 });
+
+    // A mão seguinte começa sem a aposta dobrada.
+    button('Outra mão')!.click();
+    fixture.detectChanges();
+    advance(DEAL_STEP_MS * 4);
+    expect(host.querySelector('.stake')).toBeNull();
+    expect(button('Dobrar')?.disabled).toBe(false);
+  });
+
+  it('fecha a série nos doze pontos e abre outra do zero', () => {
+    // Ela chega à mesa com onze; a mão presa (vinte a vinte) é empate, e empate é dela.
+    localStorage.setItem(TALLY_KEY, JSON.stringify({ her: 11, gambit: 0 }));
+    fixture = TestBed.createComponent(BlackjackTable);
+    fixture.detectChanges();
+    host = fixture.nativeElement as HTMLElement;
+
+    dealHand();
+    button('Parar')!.click();
+    // Ele já tem vinte: não puxa, só acerta as contas.
+    advance(REVEAL_MS + DRAW_MS / 2);
+
+    expect(host.querySelector('.tally__score')?.textContent).toContain('12');
+    expect(host.querySelector('.tally__goal')?.textContent?.trim()).toBe('a série é sua');
+    expect(voice()).toBe(pick(BLACKJACK_LINES.verdict.push));
+
+    advance(1800);
+    expect(voice()).toBe(pick(BLACKJACK_LINES.match.her));
+    expect(button('Outra mão')).toBeNull();
+
+    button('Nova série')!.click();
+    fixture.detectChanges();
+    expect(JSON.parse(localStorage.getItem(TALLY_KEY)!)).toEqual({ her: 0, gambit: 0 });
+    expect(host.querySelector('.tally__goal')?.textContent).toContain('12 leva a mesa');
+    expect(chipsCold()).toBe(true);
   });
 
   it('não deixa a mesa jogando sozinha depois de fechada', () => {

@@ -25,6 +25,22 @@ export const BLACKJACK = 21;
  * que a intenção é ela sair ganhando.
  */
 export const DEALER_STANDS_AT = 16;
+/** A série: quem chega primeiro a tantos pontos leva a mesa. */
+export const MATCH_TARGET = 12;
+
+/** O placar entre os dois. */
+export interface Tally {
+  readonly her: number;
+  readonly gambit: number;
+}
+
+/** Quem fechou a série, se alguém já chegou lá. */
+export function matchWinner(tally: Tally): Outcome | null {
+  if (tally.her >= MATCH_TARGET) return 'her';
+  if (tally.gambit >= MATCH_TARGET) return 'gambit';
+
+  return null;
+}
 
 const SUITS: readonly Suit[] = ['♠', '♥', '♦', '♣'];
 const RANKS: readonly Rank[] = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];

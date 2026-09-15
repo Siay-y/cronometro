@@ -1,4 +1,5 @@
 import {
+  afterNextRender,
   ChangeDetectionStrategy,
   Component,
   computed,
@@ -16,27 +17,29 @@ import {
   handValue,
   isBlackjack,
   isBust,
+  MATCH_TARGET,
+  matchWinner,
   Outcome,
   safeDraw,
   settle,
   shuffle,
+  Tally,
   Verdict,
 } from '../../../core/utils/blackjack.util';
 import { vibrate } from '../../../core/utils/haptics.util';
 import { BLACKJACK_LINES } from '../../../data/blackjack-lines.data';
-import { Icon } from '../../../shared/ui/icon/icon';
 import { PlayingCard } from '../../../shared/ui/playing-card/playing-card';
+import { SparkBurst } from '../../../shared/ui/spark-burst/spark-burst';
 
 /** De quem é a vez, ou se a mão acabou. */
 type Phase = 'idle' | 'her' | 'gambit' | 'over';
 
-/** O placar entre os dois, guardado no aparelho dela. */
-interface Tally {
-  readonly her: number;
-  readonly gambit: number;
-}
-
+/** O placar, guardado no aparelho dela. */
 const TALLY_KEY = 'mon-cher:vinte-e-um:v1';
+const EMPTY_TALLY: Tally = { her: 0, gambit: 0 };
+
+/** O veredito da mão fica na mesa um instante antes de ele falar da série. */
+const MATCH_LINE_MS = 1800;
 
 /** Compasso da mesa: uma carta de cada vez, com tempo de ver cair. */
 const DEAL_STEP_MS = 320;
@@ -49,9 +52,20 @@ const SAFE_HAND = 11;
 /** Daqui para cima, o certo é parar. */
 const STRONG_HAND = 17;
 
+/** A palavra do resultado, em cima da fala dele. */
+const VERDICT_LABEL: Readonly<Record<Verdict, string>> = {
+  'her-blackjack': 'Vinte e um!',
+  'her-bust': 'Estourou',
+  'gambit-bust': 'Ele estourou',
+  'her-higher': 'Sua mão',
+  'gambit-higher': 'Mão dele',
+  push: 'Empate, e é seu',
+};
+
 const CARD_PULSE_MS = 14;
 const WIN_PULSE = [30, 50, 30, 50, 90] as const;
 const LOSS_PULSE = [40, 80, 40] as const;
+const MATCH_PULSE = [40, 60, 40, 60, 40, 60, 160] as const;
 
 /**
  * Uma mão de vinte e um contra o Gambit.
@@ -63,7 +77,7 @@ const LOSS_PULSE = [40, 80, 40] as const;
  */
 @Component({
   selector: 'app-blackjack-table',
-  imports: [PlayingCard, Icon],
+  imports: [PlayingCard, SparkBurst],
   templateUrl: './blackjack-table.html',
   styleUrl: './blackjack-table.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -80,9 +94,37 @@ export class BlackjackTable {
   /** A fala dele na mesa. A de abertura é fixa: o servidor e o navegador têm de concordar. */
   protected readonly line = signal(BLACKJACK_LINES.invite[0]);
   protected readonly outcome = signal<Outcome | null>(null);
-  protected readonly tally = signal<Tally>(
-    this.storage.read<Tally>(TALLY_KEY, { her: 0, gambit: 0 }),
+  protected readonly verdict = signal<Verdict | null>(null);
+  protected readonly tally = signal<Tally>(this.storage.read<Tally>(TALLY_KEY, EMPTY_TALLY));
+  /** A série acabou de fechar para ela, nesta visita: o estouro de naipes no placar. */
+  protected readonly celebrating = signal(false);
+
+  protected readonly verdictLabel = computed(() => {
+    const verdict = this.verdict();
+
+    return verdict ? VERDICT_LABEL[verdict] : null;
+  });
+
+  /** As cartas dela acendem quando ela leva e esfriam quando perde; as dele, o inverso. */
+  protected readonly herCharge = computed(() =>
+    this.outcome() === 'her' ? 1 : this.outcome() === 'gambit' ? 0.3 : 0.85,
   );
+  protected readonly gambitCharge = computed(() => (this.outcome() === 'gambit' ? 0.9 : 0.45));
+
+  /** Quem fechou a série nos doze pontos. Enquanto ninguém chega lá, nada. */
+  protected readonly champion = computed(() => matchWinner(this.tally()));
+  /** A legenda do placar. Texto puro, e não um bloco condicional: o servidor
+   *  não conhece o placar dela, e a hidratação só tolera diferença de texto. */
+  protected readonly goal = computed(() => {
+    switch (this.champion()) {
+      case 'her':
+        return 'a série é sua';
+      case 'gambit':
+        return 'ele fechou a série';
+      default:
+        return `quem chega a ${MATCH_TARGET} leva a mesa`;
+    }
+  });
 
   protected readonly herValue = computed(() => handValue(this.her()));
   /** O que dá para somar dele: com a carta escondida, só a de cima conta. */
@@ -98,11 +140,24 @@ export class BlackjackTable {
   /** As primeiras cartas ainda estão caindo. */
   protected readonly dealing = computed(() => this.phase() === 'gambit' && this.her().length < 2);
 
+  /** Ela dobrou a aposta: a mão vale dois pontos para quem levar. */
+  protected readonly doubled = signal(false);
+  /** Dobrar é só com as duas primeiras cartas, como na regra de mesa. */
+  protected readonly canDouble = computed(() => this.herTurn() && this.her().length === 2);
+  protected readonly doubleHint = computed(() => {
+    if (this.doubled()) return 'dobrada: vale dois';
+    if (this.dealing()) return 'as cartas vêm';
+    if (this.her().length > 2) return 'só com duas cartas';
+
+    return 'vale dois: uma carta e para';
+  });
+
   /** O risco de pedir, escrito na ficha: até que carta cabe sem estourar. */
   protected readonly hitHint = computed(() => {
     const room = safeDraw(this.her());
     if (room >= 10) return 'não estoura';
     if (room === 1) return 'só um ás cabe';
+    if (room === 0) return 'não cabe mais nada';
 
     return `cabe até ${room}`;
   });
@@ -112,16 +167,34 @@ export class BlackjackTable {
 
   constructor() {
     inject(DestroyRef).onDestroy(() => this.clearTimers());
+    // Se ela voltar com a série já fechada, ele recebe com a fala da série. Só
+    // depois de hidratar: o servidor não conhece o placar dela.
+    afterNextRender(() => {
+      const champion = this.champion();
+      if (champion) this.line.set(BLACKJACK_LINES.match[champion][0]);
+    });
+  }
+
+  /** A série acabou: zera o placar e abre outra. */
+  protected newMatch(): void {
+    this.tally.set(EMPTY_TALLY);
+    this.storage.write(TALLY_KEY, EMPTY_TALLY);
+    this.deal();
   }
 
   /** Dá as cartas: uma dela, uma dele, outra dela, e a escondida dele. */
   protected deal(): void {
+    if (this.champion()) return;
+
     this.clearTimers();
     this.deck = shuffle(createDeck());
     this.her.set([]);
     this.gambit.set([]);
     this.holeRevealed.set(false);
     this.outcome.set(null);
+    this.verdict.set(null);
+    this.celebrating.set(false);
+    this.doubled.set(false);
     this.phase.set('gambit');
     this.say(BLACKJACK_LINES.deal);
 
@@ -160,8 +233,34 @@ export class BlackjackTable {
   protected stand(): void {
     if (!this.herTurn()) return;
 
-    this.phase.set('gambit');
     this.say(BLACKJACK_LINES.stand);
+    this.playOut();
+  }
+
+  /**
+   * Ela dobra a aposta: a mão passa a valer dois pontos, ela recebe uma carta
+   * só e a vez passa para ele. A vez dela fecha na hora, para não caber outro
+   * pedido enquanto a carta ainda está caindo.
+   */
+  protected double(): void {
+    if (!this.canDouble()) return;
+
+    this.doubled.set(true);
+    this.phase.set('gambit');
+    this.say(BLACKJACK_LINES.double);
+    this.later(() => {
+      this.draw('her');
+      if (isBust(this.her())) {
+        this.finish();
+        return;
+      }
+      this.playOut();
+    }, DEAL_STEP_MS);
+  }
+
+  /** A vez passa para ele: vira a carta escondida e joga a mão dele. */
+  private playOut(): void {
+    this.phase.set('gambit');
     this.later(() => {
       this.holeRevealed.set(true);
       this.playGambit();
@@ -199,15 +298,28 @@ export class BlackjackTable {
 
     this.phase.set('over');
     this.outcome.set(outcome);
+    this.verdict.set(verdict);
     this.sayVerdict(verdict);
     vibrate(outcome === 'her' ? WIN_PULSE : LOSS_PULSE);
 
+    // Mão dobrada vale dois pontos, para quem for.
+    const stake = this.doubled() ? 2 : 1;
     const next: Tally = {
-      her: this.tally().her + (outcome === 'her' ? 1 : 0),
-      gambit: this.tally().gambit + (outcome === 'gambit' ? 1 : 0),
+      her: this.tally().her + (outcome === 'her' ? stake : 0),
+      gambit: this.tally().gambit + (outcome === 'gambit' ? stake : 0),
     };
     this.tally.set(next);
     this.storage.write(TALLY_KEY, next);
+
+    // Doze pontos: depois do veredito da mão, ele fala da série.
+    const champion = matchWinner(next);
+    if (champion) {
+      this.later(() => {
+        this.say(BLACKJACK_LINES.match[champion]);
+        this.celebrating.set(champion === 'her');
+        vibrate(MATCH_PULSE);
+      }, MATCH_LINE_MS);
+    }
   }
 
   private draw(who: 'her' | 'gambit'): void {

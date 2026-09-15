@@ -8,108 +8,211 @@
     </p>
   </div>
 
+  <!-- O feltro: um véu translúcido com o fio de luz na borda, na cor de quem
+       está por cima. Magenta na vez dela, ouro quando ela leva, violeta quando
+       ele leva. -->
   <div
     class="felt"
-    [class.felt--her]="outcome() === 'her'"
-    [class.felt--gambit]="outcome() === 'gambit'"
+    [class.felt--her]="(champion() ?? outcome()) === 'her'"
+    [class.felt--gambit]="(champion() ?? outcome()) === 'gambit'"
+    [class.is-live]="herTurn()"
+    [class.is-over]="over()"
+    [class.is-closed]="champion()"
   >
-    <p class="tally">
-      <span
-        >Você <strong>{{ tally().her }}</strong></span
-      >
-      <span class="tally__x" aria-hidden="true">×</span>
-      <span
-        >Gambit <strong>{{ tally().gambit }}</strong></span
-      >
-    </p>
+    <span class="felt__aura" aria-hidden="true"></span>
+
+    <!-- O placar da série. Quem chega a doze fecha a mesa. -->
+    <div class="tally" [class.tally--her]="champion() === 'her'">
+      @if (celebrating()) {
+        <app-spark-burst tight class="tally__burst" aria-hidden="true" />
+      }
+      <p class="tally__score">
+        <span
+          >Você <strong>{{ tally().her }}</strong></span
+        >
+        <span class="tally__x" aria-hidden="true">×</span>
+        <span
+          >Gambit <strong>{{ tally().gambit }}</strong></span
+        >
+      </p>
+      <p class="tally__goal">{{ goal() }}</p>
+    </div>
 
     <!-- A mão dele: a segunda carta fica virada até ela parar. -->
     <div class="seat seat--gambit">
       <p class="seat__name">
+        <span class="seat__suit" aria-hidden="true">♠</span>
         Gambit
         @if (gambit().length) {
           <span class="seat__value">{{ gambitValue() }}{{ holeRevealed() ? '' : ' + ?' }}</span>
         }
       </p>
-      <div class="hand">
+      <div class="hand" [style.--n]="gambit().length">
         @for (card of gambit(); track $index; let i = $index) {
-          @if (i === 1) {
-            <span class="hole" [class.is-revealed]="holeRevealed()" animate.enter="anim-deal">
+          <span class="slot" [style.--i]="i">
+            @if (i === 1) {
+              <span class="hole" [class.is-revealed]="holeRevealed()" animate.enter="anim-deal">
+                <app-playing-card
+                  class="hand__card hole__back"
+                  faceDown
+                  holographic="false"
+                  [charge]="0.3"
+                />
+                <app-playing-card
+                  class="hand__card hole__face"
+                  [rank]="card.rank"
+                  [suit]="card.suit"
+                  holographic="false"
+                  [charge]="gambitCharge()"
+                />
+              </span>
+            } @else {
               <app-playing-card
-                class="hand__card hole__back"
-                faceDown
-                holographic="false"
-                [charge]="0.3"
-              />
-              <app-playing-card
-                class="hand__card hole__face"
+                class="hand__card"
                 [rank]="card.rank"
                 [suit]="card.suit"
                 holographic="false"
-                [charge]="0.5"
+                [charge]="gambitCharge()"
+                animate.enter="anim-deal"
               />
-            </span>
-          } @else {
-            <app-playing-card
-              class="hand__card"
-              [rank]="card.rank"
-              [suit]="card.suit"
-              holographic="false"
-              [charge]="0.5"
-              animate.enter="anim-deal"
-            />
-          }
+            }
+          </span>
         }
       </div>
     </div>
 
     <!-- O que ele diz a cada momento da mão. O parágrafo nasce de novo a cada
-         fala (track pelo texto), então a entrada dele anima toda vez. -->
+         fala (track pelo texto), então a entrada dele anima toda vez. Quando a
+         mão termina, a palavra do resultado vem em cima. -->
     <div class="voice-slot" aria-live="polite">
+      @if (verdictLabel(); as label) {
+        <p class="verdict" [class.verdict--her]="outcome() === 'her'" animate.enter="anim-fade-in">
+          {{ label }}
+        </p>
+      }
       @for (text of [line()]; track text) {
         <p class="voice cajun">{{ text }}</p>
       }
     </div>
 
     <div class="seat seat--her">
-      <div class="hand">
-        @for (card of her(); track $index) {
-          <app-playing-card
-            class="hand__card"
-            [rank]="card.rank"
-            [suit]="card.suit"
-            [charge]="0.9"
-            animate.enter="anim-deal"
-          />
+      <div class="hand" [style.--n]="her().length">
+        @for (card of her(); track $index; let i = $index) {
+          <span class="slot" [style.--i]="i">
+            <app-playing-card
+              class="hand__card"
+              [rank]="card.rank"
+              [suit]="card.suit"
+              [charge]="herCharge()"
+              animate.enter="anim-deal"
+            />
+          </span>
         }
       </div>
       <p class="seat__name">
         Você
+        <span class="seat__suit" aria-hidden="true">♥</span>
         @if (her().length) {
           <span class="seat__value" [class.is-bust]="herValue() > 21">{{ herValue() }}</span>
+        }
+        @if (doubled()) {
+          <span class="stake" animate.enter="anim-fade-in">vale 2</span>
         }
       </p>
     </div>
 
-    <!-- As fichas. Durante a mão as duas ficam sempre na mesa: apagadas
-         enquanto as cartas caem e enquanto ele joga, acesas na vez dela. -->
-    <div class="actions">
+    <!-- As jogadas não são botões: são as coisas que ficam numa mesa de carteado.
+         O monte para puxar, o lacre para fechar a mão, a carta carregada para
+         dobrar. Durante a mão as três ficam sempre na mesa: apagadas enquanto
+         as cartas caem e enquanto ele joga, acesas na vez dela. -->
+    <div class="actions" [class.is-play]="!(idle() || over())">
       @if (idle() || over()) {
-        <button type="button" class="chip chip--deal" (click)="deal()">
-          <span class="chip__label">
-            <app-icon name="cards" />
-            {{ over() ? 'Outra mão' : 'Dar as cartas' }}
-          </span>
-          <span class="chip__hint">{{ over() ? 'baralho novo, sorte nova' : 'uma mão só' }}</span>
+        <!-- A carta-botão da casa, a mesma que abre a carta dele. Com a série
+             fechada, ela abre outra série (e zera o placar). -->
+        <button type="button" class="deal" (click)="champion() ? newMatch() : deal()">
+          <span class="deal__pip" aria-hidden="true">♠</span>
+          <span class="play__label">{{
+            champion() ? 'Nova série' : over() ? 'Outra mão' : 'Dar as cartas'
+          }}</span>
+          <span class="deal__pip deal__pip--flip" aria-hidden="true">♠</span>
+
+          <svg class="deal__frame" viewBox="0 0 232 56" aria-hidden="true">
+            <rect
+              class="deal__track"
+              x="5.5"
+              y="5.5"
+              width="221"
+              height="45"
+              rx="5"
+              pathLength="100"
+            />
+            <rect
+              class="deal__draw"
+              x="5.5"
+              y="5.5"
+              width="221"
+              height="45"
+              rx="5"
+              pathLength="100"
+            />
+          </svg>
+          <span class="deal__sheen" aria-hidden="true"></span>
         </button>
+        <p class="play__hint">
+          {{
+            champion()
+              ? 'o placar volta a zero'
+              : over()
+                ? 'baralho novo, sorte nova'
+                : 'uma mão só'
+          }}
+        </p>
       } @else {
-        <button type="button" class="chip chip--hit" (click)="hit()" [disabled]="!herTurn()">
-          <span class="chip__label"><app-icon name="card-plus" /> Mais uma</span>
-          <span class="chip__hint">{{ dealing() ? 'as cartas vêm' : hitHint() }}</span>
+        <!-- O monte: puxar uma carta é tocar nele. -->
+        <button type="button" class="play play--hit" (click)="hit()" [disabled]="!herTurn()">
+          <span class="play__object deck" aria-hidden="true">
+            <app-playing-card class="deck__card" faceDown holographic="false" [charge]="0" />
+            <app-playing-card class="deck__card" faceDown holographic="false" [charge]="0" />
+            <app-playing-card
+              class="deck__card deck__card--top"
+              faceDown
+              holographic="false"
+              [charge]="0.4"
+            />
+          </span>
+          <span class="play__label">Mais uma</span>
+          <span class="play__hint">{{ dealing() ? 'as cartas vêm' : hitHint() }}</span>
         </button>
-        <button type="button" class="chip chip--stand" (click)="stand()" [disabled]="!herTurn()">
-          <span class="chip__label"><app-icon name="palm" /> Parar</span>
-          <span class="chip__hint">{{ dealing() ? 'calma, chère' : 'fico com ' + herValue() }}</span>
+
+        <!-- O lacre: parar é lacrar a mão como está. -->
+        <button type="button" class="play play--stand" (click)="stand()" [disabled]="!herTurn()">
+          <span class="play__object" aria-hidden="true"><span class="seal wax-seal">⚜</span></span>
+          <span class="play__label">Parar</span>
+          <span class="play__hint">{{
+            dealing() ? 'calma, chère' : 'fico com ' + herValue()
+          }}</span>
+        </button>
+
+        <!-- A carta carregada: dobrar é carregar a mão com a energia dele. Só
+             com as duas primeiras cartas; depois fica na mesa, apagada. -->
+        <button
+          type="button"
+          class="play play--double"
+          (click)="double()"
+          [disabled]="!canDouble()"
+        >
+          <span class="play__object" aria-hidden="true">
+            <app-playing-card
+              class="charged"
+              rank="2"
+              suit="♠"
+              emblem="coins"
+              holographic="false"
+              [charge]="1"
+            />
+          </span>
+          <span class="play__label">Dobrar</span>
+          <span class="play__hint">{{ doubleHint() }}</span>
         </button>
       }
     </div>
